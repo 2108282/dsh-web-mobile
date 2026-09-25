@@ -50,6 +50,22 @@
   └─ .local-tests/ · .codegraph/ · .dsh-vision-toolkit/  ← 本地不入库（gitignore 噪音区）
   ```
 
+## Docs
+
+文档路由表——遇到下述场景先读对应文档，不要重新摸索；新增长效文档必须在此挂触发行，目标没了删行防死链。
+
+- 排查设置/插件市场区布局与弹层 → `docs/debug/settings-market-debug-map.md`（DOM 层级/哈希归属/干预点索引/CDP SOP；§8=0.1.7-rc.1 复测、§9=rc.2 portal 换锚对照）
+- 排查 composer/输入区 → `docs/debug/composer-tree-recon.md`（composer 子树考古；QA 会话种子配方同源）
+- 动手改某块代码前 → `docs/maintenance/pitfalls.md`（57 坑原文，名字=锚点，索引在下方 Pitfalls 节）
+- 改手势/面板退出等行为契约 → `docs/specs/`（8 篇权威 spec；手势参数与状态机在 2026-08-27-sidebar-swipe-gestures.md，不可破）
+- 宿主升级前 → `docs/upstream/upgrade-runbook.md`（对账清单与验收电池）+ `node scripts/cdp-compat-contracts.mjs`（机读契约自动对账，无需 SESSION_ID）
+- 评估宿主代际兼容面 → `docs/upstream/2026-09-23-dsh-0.1.7-alpha.2-compat-audit.md`（28 条对账 0 改的先例与方法）；升 0.1.6-alpha.2 系前必读 `docs/upstream/2026-09-19-dsh-0.1.6-alpha.2-compat-audit.md` §10（升级前必修 3 项 + 电池 15 项）
+- 宿主会话切换卡顿/性能归因 → `docs/audits/2026-09-23-session-switch-jank-handover.md`（归因 + 止血/上游两条路线）+ `docs/upstream/host-jank-feedback.md`（上游反馈通道，tokenizeTimeLimit 更正在此）
+- 0.1.7-rc.1 手机端适配待办 → `docs/audits/2026-09-23-0.1.7-rc.1-adaptation-handover.md`（容器内 chromium 取证通道 + A/B 与真机读数）
+- 手机端会话头部/输入框 0.1.6 适配 → `docs/upstream/2026-09-19-mobile-header-0.1.6-adaptation.md`（16 条，14 已并入 layout 移动块）
+- CSS 结构回归 → `docs/audits/2026-09-15-css-surface-audit.md`（结构检测器已接入 `test:core`，基线 0 fatal / 4 info；缩进/媒体查询/选择器拆分回归会红）
+- 接手 fork wzxmt-zhc 摘抄专项 → `docs/fork-wzxmt-zhc/README.md`（先读接手协议，动手前重新 fetch fork）
+
 ## Commands
 
 ```sh
@@ -125,6 +141,7 @@ dsh web
 ## Workflow
 
 - **「全面更新」类指令默认按增量理解（用户要求，2026-09-25）**：用户说「全面更新」某文档 ≠ 推倒重写——口径是「该更新的更新（失效处就地小改）、该新增的新增（文末追加带日期增补节）」，原文结构与编号保留；实测纠偏发生后再问就晚了，文档类任务一律按此执行。
+- **main 已启用 PR-only 保护（2026-09-25 实测 GH013 拒直推，含 docs 小改）**：一切变更（含文档）走 分支→PR→CI→merge；**合并后立即删远端分支**（`git push origin --delete <branch>`；#118/#119/#120 漏删堆出 28 个陈旧分支，已清理）。本工作区有未提交改动时合并 PR 不要带 `--delete-branch`（会触发本地分支切换）。
 - **开场模糊指令先问再动（用户要求，2026-09-24）**：新开会话收到「跟进一下 X」「继续」等未给目标的指令时，**直接一句话问用户要目标与范围**，禁止自行展开 recall + 多路探测的重建调查链（浪费上下文与 token，用户点名批评）；团队协作同理——派成员干活前先问清目标，不派成员替我猜。例外：用户明说「自己找/搜刮」时仍先搜不反问。
 - **动手前自行调用 karpathy-guidelines（用户要求，2026-09-24）**：每次开始实际工作（写码/改码/排查/审查）前，先自行调用 `karpathy-guidelines` 技能加载完整准则再动手，不凭印象裸跑；不着急，先摸清再动手。
 - **Bug 定位先报告、确认后再修（用户要求，2026-09-19）**：需要跟踪定位的 bug——多步调查、根因不明、现象与成因相距远的那种——定位到根因后**不要立刻动手修**，先给出清晰报告：症状、根因、证据链、影响范围、拟议修复（有取舍时列选项），等用户确认再执行。一眼即明的简单修复不在此列。
@@ -218,7 +235,6 @@ dsh web
 
 ## Testing & QA
 
-- **设置/插件市场调试地图**：`docs/debug/settings-market-debug-map.md` —— 设置区与市场 UI 的 DOM 层级图、入口链路、CSS module 哈希对照表（VOzbGW_/eGUBIq_/hHd-Xa_…）、compat 干预点索引与 CDP 取证 SOP。排查该区域布局/弹层问题先读它，不要重新摸索层级。（2026-09-25 起随仓库入库，此前仅本地保留。）
 - Automated gates: `pnpm verify` (typecheck) and `pnpm test:core`（31 个测试文件，glob 覆盖 `tests/` 全部）. `pnpm build` additionally exercises the custom client bundler. Use `git diff --check` for whitespace hygiene.
 - There is no linter, formatter, or coverage setup; the CI workflow (`.github/workflows/ci.yml`) additionally runs the lib freshness gate `git diff --exit-code lib`.
 - After source/layout changes, install the linked plugin in a real DSH Web profile, restart `dsh web`, and check both sides of the breakpoint:
@@ -250,16 +266,7 @@ dsh web
 
 ## 维护入口
 
-- **GitHub Release 文案规格（用户要求，2026-09-20）**：Release notes 照 v2.4.1/v2.3.0 文章体例，不许直接贴 README 段落——`## vX.Y.Z · 一句话摘要` 开头 + 导语段（本版是什么、桌面 no-op 承诺、旧宿主回退建议）+ **致谢行必写**（v2.4.0 体例：「特别感谢合作人 @x（PR #63/#65：具体贡献）」+ 社区贡献与报障逐个 `@handle（#NN 报障 / PR #NN）`；条目标题带 `（#NN by @handle）`归属。署名从 GitHub 实测取：PR author + commit author + issue reporter，且只列修复确实落在本 tag 区间的——用 close 日期、closed_by 提交、`git log vA..vB` 引用三路核对，未合并的 PR 与仍 open 的报障不计）+ `### 安装`（DSHA 一句 + npm 代码块 + GitHub 直装行 + 旧名迁移提示）+ `### 新功能` / `### 修复`（`**症状**：根因 + 修法` 句式）+ `### 兼容`（宿主代际范围 + 已实装验证的第三方版本号）+ `### 完整提交`（提交少时逐条 short-hash；大版本列里程碑提交，收尾必带 `compare/vA...vB` 完整变更对比链接）。
+- **GitHub Release 文案规格（用户要求，2026-09-20）**：Release notes 照 v2.4.1/v2.3.0 文章体例，不许直接贴 README 段落——`## vX.Y.Z · 一句话摘要` 开头 + 导语段（本版是什么、桌面 no-op 承诺、旧宿主回退建议）+ **致谢行必写**（v2.4.0 体例：「特别感谢合作人 @x（PR #63/#65：具体贡献）」+ 社区贡献与报障逐个 `@handle（#NN 报障 / PR #NN）`；条目标题带 `（#NN by @handle）`归属。署名从 GitHub 实测取：PR author + commit author + issue reporter，且只列修复确实落在本 tag 区间的——用 close 日期、closed_by 提交、`git log vA..vB` 引用三路核对，未合并的 PR 与仍 open 的报障不计）+ `### 安装`（DSHA 一句 + npm 代码块 + GitHub 直装行 + 旧名迁移提示）+ `### 新功能` / `### 修复`（`**症状**：根因 + 修法` 句式）+ `### 兼容`（宿主代际范围 + 已实装验证的第三方版本号）+ `### 完整提交`（提交少时逐条 short-hash；大版本列里程碑提交，收尾必带 `compare/vA...vB` 完整变更对比链接）。**README「更新内容」段发版时同步写**（2026-09-25 用户拍板；版本合并补发时按「上游 tag 之后所有改动并入本版」口径整理，Release notes 仍单独写、不贴 README 段落）。
 
-- 0.1.7-rc.1 手机端两处适配交接（2026-09-23；含容器内起 chromium / 铸 cookie 取证通道、A/B 与真机读数、待办）：`docs/audits/2026-09-23-0.1.7-rc.1-adaptation-handover.md`。
-- 会话切换卡顿交接（2026-09-23；归因到上游无窗口化渲染 + `tokenizeTimeLimit:0`，含会话体量表、真机首屏时间线、复现命令与止血/上游两条待拍板路线）：`docs/audits/2026-09-23-session-switch-jank-handover.md`。
-- 回归探针：`scripts/probes/`（22 个回归锚点，node:builtin-only，可单跑；主探针 `pnpm smoke:cdp` 与手势门 `cdp-swipe-failures.mjs` 见 Commands）。
-- CSS 表面审查（发现清单 + 施工任务 + 再审查协议 + 完整修复链）：`docs/audits/2026-09-15-css-surface-audit.md`；结构检测器 `node scripts/css-structure-check.mjs`（基线 0 fatal / 4 info，2026-09-24 实测，4 条 info 均预存：layout.css.ts:1624/:1627、compat.css.ts:968、max-height 配对）——**已接入 `test:core`**（`tests/css-structure.test.ts`，2026-09-16），所以缩进错位/重复媒体查询/选择器拆分回归会红。
-- 设计 spec：`docs/specs/`（权威设计文档随仓库走）；`.local-tests/` 探针原稿与 `docs/superpowers/` 仍是本地不入库（`docs/debug/` 两份调试地图已于 2026-09-25 入库，commit e7b1081）。
 - CI：`.github/workflows/ci.yml`——verify → test:core → build → `git diff --exit-code lib`（lib 新鲜度门）。**本地照抄这条会假绿**：它比的是**工作区↔索引**，`git add` 之后恒真，源码没提交也能过（本分支出过两个只装 `lib/` 的提交）。本地正确判据＝源码与 `lib/` 同一提交 → 再 `pnpm build` → `git diff --exit-code HEAD -- lib`；另加 `git status --porcelain --ignored lib` 必须为空（`git diff` 看不见未跟踪孤儿产物，而 tsc 从不清理 outDir）。**推 `fix/*` 分支不触发任何 CI**（workflow 只监听 main + PR），所以「推上去了」≠「被检查过」。
 - 引擎底线：`package.json` engines `node >=24.0.0`（tests 依赖 Node 原生 TS type-stripping）。
-- 宿主升级对账清单：`docs/upstream/upgrade-runbook.md`；哈希契约机读版 `docs/upstream/compat-contracts.json`，自动对账 `node scripts/cdp-compat-contracts.mjs`（无需 SESSION_ID；非 lazy MISS 才 exit 1，SKIP 按条目 `state` 手动复扫）。
-- 0.1.7-alpha.2 契约静态对账（2026-09-22，28 条对账，插件代码 0 处需改；死哈希 `_dialog_w1urq_22` 已改结构化 marker，runbook 契约计数随之修正 26 → 28）：`docs/upstream/2026-09-23-dsh-0.1.7-alpha.2-compat-audit.md`。
-- 0.1.6-alpha.2 源码对账（2026-09-19，未升级；含五路分区子代理审查合并）：`docs/upstream/2026-09-19-dsh-0.1.6-alpha.2-compat-audit.md`（§1-§10，241 行）——sessions 服务三重移除（open/clear/SessionListState.current，6 调用点，升级前必修）、右栏 dockkit 停靠系统（最大新碰撞面）、ContextMeter 移入 dock 条、tools 行删回形针加 permission 槽、permission 治理 6 规则打空（改锚 div.modes）、qDHVXG_ 探针死针（当下就红）、headerHidden→headerBlank、26 契约普查（17 存活/1 删/8 死针）。tag↔tag 源码 diff + dist 哈希普查双通道方法见 §5；升级前必修 3 项与电池 15 项见 §10 与 runbook §6。
-- 手机端会话头部/输入框的 0.1.6-alpha.2 适配对账（2026-09-19，16 条；其中 14 条已并入 `layout.css.ts` 的移动块，#6/#7 锚在 DSHA 专有标记故未并入）：`docs/upstream/2026-09-19-mobile-header-0.1.6-adaptation.md`。
