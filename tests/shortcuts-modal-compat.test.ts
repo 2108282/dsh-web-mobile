@@ -46,6 +46,16 @@ test('dedicated mobile rules for shortcuts modal are registered with exact selec
   )
   assert.match(
     LAYOUT_CSS,
+    /\[role="dialog"\]\[data-shortcut-modal="shortcuts"\]\s*ul\[class\*="_rows"\]\s*\{[\s\S]*?flex-direction:\s*column\s*!important/,
+    'shortcuts list rows container must be a vertical column',
+  )
+  assert.match(
+    LAYOUT_CSS,
+    /\[role="dialog"\]\[data-shortcut-modal="shortcuts"\]\s*li\[class\*="_row"\]\s*\{[\s\S]*?justify-content:\s*space-between\s*!important/,
+    'shortcuts each row must justify content horizontally',
+  )
+  assert.match(
+    LAYOUT_CSS,
     /\[role="dialog"\]\[data-shortcut-modal="shortcuts"\]\s*header\[class\*="_header"\]\s*\{[\s\S]*?display:\s*flex\s*!important/,
     'shortcuts header must be restored and displayed',
   )

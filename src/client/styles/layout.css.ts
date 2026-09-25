@@ -2361,10 +2361,22 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
   }
-  [role="dialog"][data-shortcut-modal="shortcuts"] [class*="_row"] {
+  [role="dialog"][data-shortcut-modal="shortcuts"] ul[class*="_rows"] {
     display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 2px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+  }
+  [role="dialog"][data-shortcut-modal="shortcuts"] li[class*="_row"] {
+    display: flex !important;
+    flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
     gap: 8px !important;
     min-height: 42px !important;
     padding: 6px 8px !important;
