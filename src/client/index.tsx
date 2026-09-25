@@ -160,7 +160,19 @@ export function apply(ctx: ClientContext): void {
       (cb) => window.requestAnimationFrame(cb),
       (id) => window.cancelAnimationFrame(id),
     )
-    const mo = new MutationObserver(() => {
+    const mo = new MutationObserver((records) => {
+      if (records) {
+        let hasNonTyping = false
+        for (const r of records) {
+          const t = r.target
+          const el = t && (t.nodeType === 1 ? (t as Element) : t.parentElement)
+          if (!el || !el.closest('[contenteditable], [data-input-scroll], [class*="_composer"], [class*="composer"]')) {
+            hasNonTyping = true
+            break
+          }
+        }
+        if (!hasNonTyping) return
+      }
       if (mq.matches) scheduler.schedule(() => { if (mq.matches) apply() })
     })
     mo.observe(document.documentElement, { childList: true, subtree: true })

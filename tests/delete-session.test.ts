@@ -290,7 +290,11 @@ test('reports cleanup-failed and settles workspace accounting when a live sessio
 // of the PARENT project directory: renaming payloads only needs write access
 // to the session directory (succeeds), while renaming the directory itself
 // needs write access to its parent (fails) — precisely the stash stage.
-test('the live stash-stage message guides a suffix restore instead of a bare retry', async () => {
+test('the live stash-stage message guides a suffix restore instead of a bare retry', async (t) => {
+  if (process.getuid?.() === 0) {
+    t.skip('chmod 0o500 has no effect under root (DAC override)')
+    return
+  }
   const base = await mkdtemp(join(tmpdir(), 'dsh-del-'))
   try {
     const root = base

@@ -230,6 +230,18 @@ export function installReconciler(ctx: ClientContext): () => void {
     // re-renders) into one dirty-key pass per animation frame. Each task
     // declares scopes so only intersecting tasks run on a given flush.
     const observer = new MutationObserver((records) => {
+      // DSHA 优化：若变动全部来自输入框编辑区，说明用户正在输入，跳过重算防掉帧/失焦
+      let hasNonTyping = false
+      for (const record of records) {
+        const target = record.target
+        const el = target && (target.nodeType === 1 ? (target as Element) : target.parentElement)
+        if (!el || !el.closest('[contenteditable], [data-input-scroll], [class*="_composer"], [class*="composer"]')) {
+          hasNonTyping = true
+          break
+        }
+      }
+      if (!hasNonTyping) return
+
       const keys = new Set<string>()
       for (const record of records) {
         keys.add(

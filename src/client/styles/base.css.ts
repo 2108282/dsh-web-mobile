@@ -5,7 +5,8 @@ export const BASE_CSS = `
 /* ---------- base control styles (rendered at any width, hidden where unused) ---------- */
 
 [data-mobile-nav="toggle"],
-[data-mobile-nav="files"] {
+[data-mobile-nav="files"],
+[data-mobile-nav="jobs-placeholder"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -22,12 +23,15 @@ export const BASE_CSS = `
 }
 [data-mobile-nav="toggle"]:hover,
 [data-mobile-nav="files"]:hover,
+[data-mobile-nav="jobs-placeholder"]:hover,
 [data-mobile-nav="toggle"]:active,
-[data-mobile-nav="files"]:active {
+[data-mobile-nav="files"]:active,
+[data-mobile-nav="jobs-placeholder"]:active {
   background: var(--dsw-alias-interactive-bg-hover, rgba(0, 0, 0, .06));
 }
 [data-mobile-nav="toggle"]:focus-visible,
-[data-mobile-nav="files"]:focus-visible {
+[data-mobile-nav="files"]:focus-visible,
+[data-mobile-nav="jobs-placeholder"]:focus-visible {
   outline: 2px solid var(--dsw-alias-state-business-primary, #4f6ef7);
   outline-offset: 1px;
 }

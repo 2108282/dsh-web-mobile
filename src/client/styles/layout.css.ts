@@ -1045,24 +1045,12 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     top: 12px !important;
     z-index: 2 !important;
   }
-  /* The files opener is pinned to the header's right corner, mirroring the
-     directory toggle on the left (same 8px edge, same 12px seat). In flow it
-     can never reach that corner: the host reserves the last 44px of the title
-     cluster for a utilities seat that is EMPTY on mobile - measured at 390px,
-     headerUtilities sits at x=374 with width 0 while the title cluster carries
-     padding-right: 44px - so the button stopped at x=300..328 and left 62px of
-     bare header to its right (2026-09-14 phone-side report: the opener is not
-     pinned to the top-right corner). Absolute positioning also returns its
-     28px of flow width to the title lane, and the containing block is the same
-     one the toggle resolves against, so both controls shift together with the
-     frame's safe-area padding. The 44px reservation itself is trimmed to the
-     28px band this button actually paints in the compact-rows block below, so
-     the title lane keeps the difference. */
+  /* Files and jobs buttons flow naturally inside the header toolbar */
   [data-mobile-nav="files"] {
-    position: absolute !important;
-    right: 8px !important;
-    left: auto !important;
-    top: 12px !important;
+    position: static !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     z-index: 2 !important;
   }
   [data-mobile-nav="frame"] [data-phase] header [class*="_headerActions"] {
@@ -1572,40 +1560,29 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     justify-content: flex-start !important;
   }
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-mobile-nav="files"] {
-    width: 36px !important;
-    height: 36px !important;
-    flex: 0 0 36px !important;
-    /* Keep the 36px seat the reference phone UI shows (opener box 316..352 at
-       360px, icon 326..342): it is the geometry the lane's 46px reservation
-       above is tuned against. Mirror the toggle's centre (top:6px for a 28px
-       control -> centre y=20) by lifting the taller box to top:2px. */
-    top: 2px !important;
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    order: 3 !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    flex: 0 0 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: var(--dsw-alias-label-secondary, #888) !important;
+    cursor: pointer !important;
+    padding: 0 !important;
   }
-  /* 新宿主把「右侧栏入口」放进了 titleRow 的 headerCorner。手机上市宿右侧栏
-     就是 Files 面板，所以它和插件的文件按钮是同一个面板的两个入口；而它带
-     margin-right:-16px，36px 盒子在 360px 视口下会从文件按钮右侧漏出一角
-     （2026-09-22 实测：corner [332,2 36x36]、图标 343..358 外露，被视口裁切），
-     与参考图"右上角只有一个文件夹图标"不一致，也与插件自己的文件按钮重复。
-     只针对标题行内的 corner，老一代宿主（corner 是唯一入口）不受影响。 */
-  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="wSkVaW_titleRow"] > [class*="_headerCorner"] {
+  /* 隐藏重复的右侧 Corner，避免遮盖文件树与操作区 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) > :first-child > :last-child[class*="_headerCorner"],
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerCorner"] {
     display: none !important;
-  }
-  /* 右上角换人：0.1.6 把「右侧栏展开按钮」放进了 headerCorner，而插件的
-     老规则「header > :first-child > :last-child 显示 none」在 0.1.5
-     藏的是「会话日志胶囊」；新结构里 titleRow 的 :last-child 变成 corner，
-     于是右侧栏入口被误藏、面板在手机上打不开。这里把 corner 放出来，
-     同时让出「⋯」菜单那一格（360px 一行塞不下两个）。 */
-  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) > :first-child > :last-child[class*="_headerCorner"] {
-    display: flex !important;
-    flex: 0 0 auto !important;
-    margin-left: 4px !important;
-    margin-right: 0 !important;
-  }
-  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerCorner"] button {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
   }
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerUtilities"] {
     display: none !important;
@@ -1613,72 +1590,186 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [role="tablist"] {
     width: 100% !important;
     margin-top: 4px !important;
+    padding-right: 8px !important;
+    box-sizing: border-box !important;
   }
-  /* 标签行右侧的两个状态 chip：
-     · 后台任务 chip（dsh-client-ui-jobs 的 QsffPG_root）
-     · 子代理谱系 chip（dsh-client-ui-subagent 的 ZKlsPq_root）
-     它们在动作行里会和标题窗口 + 预设 + 文件抢同一条 flex，实测直接叠在一起
-     （进子代理会话时最明显）。两块都绝对定位到「对话/轨迹」行右侧，动作行只留
-     [预设][文件]；标签行右侧按 chip 宽度预留，标签变多横向滑动也不会钻到下面。
-     两个 chip 同时存在时，子代理排在后台任务左边。 */
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) {
     position: relative !important;
   }
-  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [role="tablist"] {
-    padding-right: 8px !important;
-    /* 宿主的标签行宽度是满宽、默认 content-box，加 padding 会把它顶到
-       x=8..368（右缘越过 header 右缘 360 共 8px，header.scrollWidth-clientWidth=8），
-       也就是下面那条 118px 预留里有 8px 落在屏外。补 border-box 把它收回来，
-       预留才是"整整 118px"。 */
-    box-sizing: border-box !important;
-  }
-  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]):has([class*="QsffPG_root"]) [role="tablist"] {
-    padding-right: 118px !important;
-  }
-   /* Agent Team chip（VoX2oq_root，data-team-action）被 rc 代 pin 规则钉死
-      （flex 0 0 auto + order 2，实测 98.7px），动作行里唯一可缩的模式 chip
-      被压到 56.2px（390px 实测「创造模式」只剩「创造…」）。模式 chip 是
-      手机端唯一的模式切换入口（pitfalls ⑤：必须保字），团队 chip 的完整
-      文字在自己的面板里有承载（点开即达），所以让它先让：保持 order:2
-      不变（创造在前、团队在后的次序不能翻），只把不可缩改成可缩，并加
-      收缩下限保住图标点击区；内部省略号窗口由 rc 代的
-      > button / > button > * 规则继续供给。特异性 (0,5,1) 高于 pin 规则
-      (0,4,1)，且 !important，不依赖书写顺序；:has 门控保证 rc 宿主不命中。
-      2026-09-23 下限 44 → 28（用户拍板）：宿主自己那条 @container(width<=480px)
-      把标签藏了，手机档这颗 chip 实际只剩 14px 图标，44px 的盒子成了那一行
-      最宽的空占位（真机 dpr 4：图标右缘 291 → 文件按钮图标左缘 326，观感 35px
-      留白）。28 = 图标 14 + 宿主自带左右内边距 7（.VoX2oq_trigger padding），
-      与本插件 toggle/files 同尺寸，不再额外扩拍击区。 */
-  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-team-action][class*="_root"] {
+
+  /* 1. Agent Team 按钮：order 1，紧凑自适应不撑爆整行 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-team-action] {
+    order: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
     flex: 0 1 auto !important;
-    min-width: 28px !important;
+    max-width: 110px !important;
   }
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-team-action] button {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 6px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* 2. 后台任务按钮：order 2，常驻在上面那一排（解除绝对定位与 bottom: 0） */
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerActions"] [class*="QsffPG_root"] {
-    position: absolute !important;
-    right: 8px !important;
-    /* 和子代理 chip 同一套：贴 header 底边 + 下内边距 9px = 与标签文字齐平。 */
-    bottom: 0 !important;
-    height: 25px !important;
-    min-height: 25px !important;
-    /* 必须显式 flex：宿主 .QsffPG_root 只声明了 position:relative，是 block 容器，
-       下面那条 align-items 在 block 上完全无效 —— 里面的 inline-flex 按钮会按基线
-       落位，实测低 6.8px、内容挂出 header 下沿（69.5 -> 75.8），和第 11 条那类
-       "chip 与标签行不齐平"是同一毛病。谱系 chip 的 .ZKlsPq_root 本身就是
-       inline-flex，所以只有 jobs 这个 root 需要补。 */
-    display: flex !important;
-    align-items: stretch !important;
+    position: static !important;
+    bottom: auto !important;
+    right: auto !important;
+    order: 2 !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    display: inline-flex !important;
+    align-items: center !important;
     z-index: 3 !important;
     margin: 0 !important;
     min-width: 0 !important;
-    max-width: 118px !important;
+    max-width: 100px !important;
     flex: 0 0 auto !important;
   }
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="QsffPG_root"] > button {
-    height: 25px !important;
-    min-height: 25px !important;
-    padding: 0 2px 9px !important;
-    line-height: 16px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 6px !important;
+    line-height: 18px !important;
     align-items: center !important;
+  }
+
+  /* 当官方无活跃任务时呈现常驻占位任务按钮：order 2 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-mobile-nav="jobs-placeholder"] {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    order: 2 !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    flex: 0 0 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: var(--dsw-alias-label-secondary, #888) !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+  }
+  /* 当官方活跃任务出现时，隐藏占位按钮，显示带运行指示器的官方按钮 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]):has([class*="QsffPG_root"]) [data-mobile-nav="jobs-placeholder"] {
+    display: none !important;
+  }
+
+  /* =========================================================================
+     【满宽弹性修复】0.1.7 会话头部操作栏撑满整行，根除右侧空白与左移
+     ========================================================================= */
+
+  /* header 顶层容器：重置 grid 与右侧多余 padding */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) {
+    padding-left: 0 !important;
+    padding-right: 8px !important;
+    padding-top: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+
+  /* 彻底屏蔽右侧干扰节点与前置空节点 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerLeading"],
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-conversation-header-leading],
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerUtilities"],
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerCorner"],
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-conversation-header-corner] {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 会话标题行：满宽 Flex，左侧留出抽屉开关位置 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_titleRow"] {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-left: 36px !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    position: relative !important;
+  }
+
+  /* 标题簇容器：满宽占据全部可用空间，左右两端自然对齐 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_titleCluster"] {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 8px !important;
+    overflow: visible !important;
+  }
+
+  /* 标题文字：弹性收缩，超长自动省略，不被左边缘切字 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_titleCluster"] > [class*="_crumbs"] {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    max-width: 120px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] * {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+  }
+
+  /* 右侧操作按钮区：靠右排列至屏幕最右端 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerActions"] {
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    margin-left: auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  /* 模式预设（switcher）：极简紧凑展示，避免长文字抢占右侧三大按钮空间 */
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_switcherRoot"] {
+    order: 0 !important;
+    max-width: 60px !important;
+    overflow: hidden !important;
+  }
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_switcherRoot"] [class*="_label"]:not(:has(> svg)) {
+    display: none !important;
   }
   /* 头部弹层定位（jobs 任务列表 / subagent 谱系 / 预设菜单都会命中的同一族）：
      插件老规则是「弹层左缘 = chip 左缘 + 8px」，那条规则成立的年代 chip 都

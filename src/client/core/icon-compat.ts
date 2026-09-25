@@ -39,13 +39,29 @@ const pickIcon = (names: readonly string[]): HostIcon => {
 }
 
 /** 输入区文件入口（回形针）。 */
-export const IconPaperclip: HostIcon = pickIcon(['IconPaperclipOutlineRegular', 'IconPaperclipOutline16'])
+export const IconPaperclip: HostIcon = pickIcon([
+  'IconPaperclipOutlineMedium',
+  'IconPaperclipOutlineRegular',
+  'IconPaperclipOutline16',
+])
 
 /** 抽屉页脚的会话日志导出。 */
-export const IconDownload: HostIcon = pickIcon(['IconDownloadOutlineRegular', 'IconDownloadOutline16'])
+export const IconDownload: HostIcon = pickIcon([
+  'IconDownloadOutlineMedium',
+  'IconDownloadOutlineRegular',
+  'IconDownloadOutline16',
+])
 
 /** 会话头部的目录抽屉开关。 */
-export const IconPanelLeft: HostIcon = pickIcon(['IconPanelLeftOutlineRegular', 'IconPanelLeftOutline16'])
+export const IconPanelLeft: HostIcon = pickIcon([
+  'IconPanelLeftOutlineMedium',
+  'IconPanelLeftOutlineRegular',
+  'IconPanelLeftOutline16',
+])
 
 /** 会话头部的 Files/右侧栏入口。 */
-export const IconFolderOpen: HostIcon = pickIcon(['IconFolderOpenOutlineRegular', 'IconFolderOpenOutline16'])
+export const IconFolderOpen: HostIcon = pickIcon([
+  'IconFolderOpenOutlineMedium',
+  'IconFolderOpenOutlineRegular',
+  'IconFolderOpenOutline16',
+])
