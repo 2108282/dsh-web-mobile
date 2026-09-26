@@ -60,11 +60,15 @@ export function createStatsLineTask(): ReconcilerTask {
     if (styled.style.top !== `${top}px`) styled.style.top = `${top}px`
   }
 
+  let lastTpsLayoutAt = 0
+  let lastRingLayoutAt = 0
+  const THROTTLE_MS = 250
+
   // The composer root renders the TPS readout ("TPS 89.4 tok/s") as its own
   // row BELOW the status strip; fold it into the strip so every metric sits
   // on one line. Idempotent: the placeholder's text mirrors the readout and
   // the readout itself is overlaid on the placeholder's box.
-  const moveTps = (stats: Element): void => {
+  const moveTps = (stats: Element, force = false): void => {
     const stack = stats.closest('[class*="_composerStack"]')
     if (stack === null) return
     let reserve = stats.querySelector(':scope > [data-mobile-nav="stats-tps-reserve"]')
@@ -80,17 +84,26 @@ export function createStatsLineTask(): ReconcilerTask {
         stats.appendChild(reserve)
       }
       const live = el.textContent ?? ''
-      if (reserve.textContent !== live) reserve.textContent = live
+      const textChanged = reserve.textContent !== live
+      if (textChanged) reserve.textContent = live
       el.setAttribute('data-mobile-nav', 'stats-tps')
       const tpsRow = el.parentElement
       if (tpsRow === null) continue
       ensurePositioned(tpsRow, 'stats-tps-row')
+
+      const now = Date.now()
+      const styled = el as HTMLElement
+      // 性能节流：若读数未变且已定位，或距离上次测量不足 THROTTLE_MS，跳过昂贵的 getBoundingClientRect
+      if (!force && styled.style.left && !textChanged && (now - lastTpsLayoutAt < THROTTLE_MS)) {
+        return
+      }
+      lastTpsLayoutAt = now
+
       placeOverlay(el, reserve)
       // The strip's last child is the flex shrink group: mirror whatever
       // width the placeholder settled on so the overlay clips with the same
       // ellipsis instead of overlapping the neighbouring group.
       const width = reserve.getBoundingClientRect().width
-      const styled = el as HTMLElement
       if (styled.style.maxWidth !== `${width}px`) styled.style.maxWidth = `${width}px`
       return
     }
@@ -99,7 +112,7 @@ export function createStatsLineTask(): ReconcilerTask {
   // 的右簇（模型/麦克风旁），CSS 用 font-size:0 只留环、隐掉 "45%" 文本；统计条
   // 拿满整宽。与 moveTps 同款 overlay：环留在 React 渲染的 dock 原位，插件自建
   // 占位 span 顶住右簇槽位（16px 环 + 2px 边距，行 gap 补足余量）。
-  const moveRing = (stats: Element): void => {
+  const moveRing = (stats: Element, force = false): void => {
     const holder = stats.parentElement
     const dock = holder === null ? null : holder.parentElement
     if (dock === null) return
@@ -126,14 +139,23 @@ export function createStatsLineTask(): ReconcilerTask {
       ring.setAttribute('data-mobile-nav', 'stats-ring')
     }
     ensurePositioned(dock, 'stats-ring-dock')
+
+    const now = Date.now()
+    const styled = ring as HTMLElement
+    // 性能节流：若已完成定位且非强制刷新，在 THROTTLE_MS 内跳过重复的同步测量
+    if (!force && styled.style.left && (now - lastRingLayoutAt < THROTTLE_MS)) {
+      return
+    }
+    lastRingLayoutAt = now
+
     placeOverlay(ring, reserve)
   }
   let viewportHandler: (() => void) | null = null
   const relayout = (): void => {
     const anchor = document.querySelector('[data-mobile-nav="stats"]')
     if (anchor === null) return
-    moveTps(anchor)
-    moveRing(anchor)
+    moveTps(anchor, true)
+    moveRing(anchor, true)
   }
   const mark = (): void => {
     // Keyboard open/close and viewport rotations relayout the composer without
@@ -149,8 +171,8 @@ export function createStatsLineTask(): ReconcilerTask {
     // readout is re-folded.
     const anchor = document.querySelector('[data-mobile-nav="stats"]')
     if (anchor !== null && statsAnchorAlive(anchor)) {
-      moveTps(anchor)
-      moveRing(anchor)
+      moveTps(anchor, false)
+      moveRing(anchor, false)
       return
     }
     // Stale marker on a node that left the composer stack/phase context:
