@@ -131,9 +131,9 @@ export const MISC_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      audit D-1 option A). Scoped to the frame marker; the
      viewer itself is scoped by its stable dsfv prefix.
      (Port of community fork fix 2ff7976.) */
-  html[data-mobile-nav-ios] :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="dsfv-search-input"],
-  html[data-mobile-nav-ios] :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="dsfv-jump-input"],
-  html[data-mobile-nav-ios] :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="dsfv-page-input"] {
+  html[data-mobile-nav-ios] :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="dsfv-search-input"],
+  html[data-mobile-nav-ios] :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="dsfv-jump-input"],
+  html[data-mobile-nav-ios] :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="dsfv-page-input"] {
     font-size: 16px !important;
   }
 
@@ -197,7 +197,7 @@ export const MISC_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      max rAF gap 167 -> 33ms; the benefit scales with conversation length.
      Desktop untouched (this block lives inside the max-width: 1023px
      media query). */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) > :first-child [role="tree"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) > :first-child [role="tree"] {
     content-visibility: auto;
     contain-intrinsic-size: auto 600px;
   }

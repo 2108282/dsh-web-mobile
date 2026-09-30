@@ -89,11 +89,11 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
       padding-top .24s var(--ds-ease-out, ease-in-out) !important;
   }
   /* User-opened preview sheet (frame marker, set on file-row tap). */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-aionui-preview-open] [data-aionui-preview-col] {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-aionui-preview-open] [data-aionui-preview-col] {
     visibility: visible !important;
   }
   /* The Files action opens the explorer sheet (frame marker). */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-aionui-explorer-open] [data-aionui-explorer-col] {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-aionui-explorer-open] [data-aionui-explorer-col] {
     visibility: visible !important;
   }
   /* While the preview sheet is up, the explorer sheet yields (two stacked
@@ -101,7 +101,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      via its collapse chevron / tab close clears the marker, and the
      explorer sheet returns. Same specificity as the explorer-open rule, so
      this must stay AFTER it. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-aionui-preview-open] [data-aionui-explorer-col] {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-aionui-preview-open] [data-aionui-explorer-col] {
     visibility: hidden !important;
   }
   /* The open drawer must never sit under a sheet: while the frame is in the
@@ -109,8 +109,8 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      open marker rule, so it wins at equal specificity). The fullscreen
      toggle is a descendant of this column, so it is hidden with the rest of
      the column — there is no separate drawer-open rule for it. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]):not([data-sidebar-collapsed]) [data-aionui-explorer-col],
-  :is([data-dsh-frame], [data-mobile-nav="frame"]):not([data-sidebar-collapsed]) [data-aionui-preview-col] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]):not([data-sidebar-collapsed]) [data-aionui-explorer-col],
+  :is([data-mobile-nav="frame"], [class*="_frame"]):not([data-sidebar-collapsed]) [data-aionui-preview-col] {
     visibility: hidden !important;
     display: none !important;
   }
@@ -171,23 +171,23 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
   /* Visible only while the preview sheet is open. Visibility itself is
      inherited from the column, so the sheet's own hide rules (collapse,
      drawer open) cover the button too. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-aionui-preview-open] [data-aionui-preview-col] [data-mobile-nav="preview-full-toggle"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-aionui-preview-open] [data-aionui-preview-col] [data-mobile-nav="preview-full-toggle"] {
     display: inline-flex !important;
   }
   /* Icon swap on the frame fullscreen marker. */
   [data-mobile-nav="preview-full-toggle"] .dsh-web-mobile-full-out {
     display: none !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-mobile-preview-full] [data-aionui-preview-col] [data-mobile-nav="preview-full-toggle"] .dsh-web-mobile-full-in {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-mobile-preview-full] [data-aionui-preview-col] [data-mobile-nav="preview-full-toggle"] .dsh-web-mobile-full-in {
     display: none !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-mobile-preview-full] [data-aionui-preview-col] [data-mobile-nav="preview-full-toggle"] .dsh-web-mobile-full-out {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-mobile-preview-full] [data-aionui-preview-col] [data-mobile-nav="preview-full-toggle"] .dsh-web-mobile-full-out {
     display: inline !important;
   }
   /* Fullscreen preview: the sheet fills the whole viewport (notch included);
      the safe-area padding drops the titlebar row below the status bar, and
      the toggle follows the titlebar into the top corner. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-aionui-preview-open][data-mobile-preview-full] [data-aionui-preview-col] {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-aionui-preview-open][data-mobile-preview-full] [data-aionui-preview-col] {
     inset: 0 !important;
     left: 0 !important;
     right: 0 !important;
@@ -205,7 +205,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
   }
   /* Fullscreen: the column fills the viewport, so the button follows the
      titlebar row down below the notch. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-mobile-preview-full] [data-aionui-preview-col] [data-mobile-nav="preview-full-toggle"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-mobile-preview-full] [data-aionui-preview-col] [data-mobile-nav="preview-full-toggle"] {
     top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -280,7 +280,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      would resolve against the tiny relative trigger wrapper and land even
      further right). The upstream 86vw width cap, 70vh max-height and
      internal scroll all still apply; the close button stays inside.
-     2026-09-25: re-anchored from :is([data-dsh-frame], [data-mobile-nav="frame"]) [aria-modal]
+     2026-09-25: re-anchored from :is([data-mobile-nav="frame"], [class*="_frame"]) [aria-modal]
      to the market's own root marker — since rc.2 the whole settings
      sheet (market included) is portaled to <body> and no longer matches a
      frame-descendant selector. */
@@ -305,7 +305,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      instead: line 1 keeps icon + title + repo + version, the update
      buttons get their own full-width-feeling second line, and the title
      itself is locked to one ellipsized line no matter what follows it.
-     2026-09-25: re-anchored from :is([data-dsh-frame], [data-mobile-nav="frame"]) [aria-modal]
+     2026-09-25: re-anchored from :is([data-mobile-nav="frame"], [class*="_frame"]) [aria-modal]
      to the market's own root marker — since rc.2 the whole settings
      sheet (market included) is portaled to <body> and no longer matches a
      frame-descendant selector. Same day, second pass: the ported rule's
@@ -406,7 +406,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      the 2026-08-23 report no longer applies; the rule is kept and twinned
      for the categories row it restores (guarded by the test suite). */
   @media (max-width: 560px) {
-    :is([data-dsh-frame], [data-mobile-nav="frame"]) [role="dialog"]:has([data-dsh-market-root]) > nav {
+    :is([data-mobile-nav="frame"], [class*="_frame"]) [role="dialog"]:has([data-dsh-market-root]) > nav {
       display: flex !important;
     }
     [role="dialog"]:has([data-dsh-market-root]) > nav {
@@ -443,7 +443,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
   /* Nav tabs + toolbar: TOMBSTONE (2026-09-25). This whole family —
      the single-row scroller, its hairline scrollbar, the compact cells and
      the hidden "Open configuration file" button — was scoped to
-     :is([data-dsh-frame], [data-mobile-nav="frame"]) because rc.1 rendered the settings sheet in
+     :is([data-mobile-nav="frame"], [class*="_frame"]) because rc.1 rendered the settings sheet in
      place, inside the app frame. rc.2 wraps the sheet in
      createPortal(..., document.body): the overlay is a direct body child,
      nothing inside it matches a frame-descendant selector, and every rule
@@ -535,7 +535,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
   /* The official footerActions row also hosts the remote-web-ui entry
      row (two icon buttons); without wrapping the two groups squeeze each
      other on one line. Wrap so each group gets its own full-width row. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="_footerActions"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="_footerActions"] {
     flex-wrap: wrap !important;
     gap: 6px !important;
   }
@@ -770,28 +770,28 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      fits, chevron with breathing room. Scoped to the mobile frame marker —
      desktop keeps genui's own styling untouched. */
 
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [data-genui-panel] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-genui-panel] {
     margin: 6px 12px 4px !important;
     border-color: var(--dsw-alias-border-l1, rgba(0, 0, 0, .12)) !important;
     border-radius: 12px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [data-genui-panel] [class*="_panelToggle"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-genui-panel] [class*="_panelToggle"] {
     padding: 7px 12px !important;
     gap: 8px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [data-genui-panel] [class*="_panelBadge"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-genui-panel] [class*="_panelBadge"] {
     padding: 0 7px !important;
     border-radius: 5px !important;
     font-size: 10.5px !important;
     line-height: 1.7 !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [data-genui-panel] [class*="_panelTitle"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-genui-panel] [class*="_panelTitle"] {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     font-size: 12.5px !important;
     line-height: 1.45 !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [data-genui-panel] [class*="_panelChevron"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-genui-panel] [class*="_panelChevron"] {
     flex: none !important;
     margin-left: 0 !important;
     padding-left: 4px !important;
@@ -819,10 +819,10 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      the chip is no longer a card descendant, so a card-level :has() could
      never match; the card disambiguation keeps non-composer cards (e.g. a
      todo card sharing the stack) out of the chip row. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="_composerStack"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="_composerStack"] {
     position: relative;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [data-gitgraph-chip-anchor] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-gitgraph-chip-anchor] {
     position: absolute !important;
     top: 12px !important;
     left: 28px !important;
@@ -830,10 +830,10 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
     bottom: auto !important;
     z-index: 1 !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [data-phase="hero"] [data-gitgraph-chip-anchor] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase="hero"] [data-gitgraph-chip-anchor] {
     top: 134.9px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="_composerStack"]:has([data-gitgraph-chip-anchor]) [class*="_card"]:has(textarea, [data-composer-input]) {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="_composerStack"]:has([data-gitgraph-chip-anchor]) [class*="_card"]:has(textarea, [data-composer-input]) {
     padding-top: 44px !important;
   }
 
@@ -850,7 +850,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      (360px content + 24px padding + 2px border) so tablets keep the
      intended card width instead of stretching. Desktop is untouched: the
      frame marker only exists below 1024px. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) .meme-picker {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) .meme-picker {
     left: 0 !important;
     right: 0 !important;
     width: auto !important;
@@ -864,27 +864,27 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      repeat(auto-fill, minmax(64px,1fr)) 让列数随可用宽度伸缩、卡片 width:100% +
      aspect-ratio:1 随轨道自适应(方形,cover 裁切不变),gap 仍是 dsh-meme 的 8px。
      行内 width/height 用 !important 覆盖;手机端约 4 列、平板端约 5 列,均满宽。 */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) .meme-picker .mp-grid {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) .meme-picker .mp-grid {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)) !important;
     scrollbar-width: thin !important;
     scrollbar-color: var(--dsw-alias-label-tertiary, rgba(0, 0, 0, .3)) transparent !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) .meme-picker .mp-cell {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) .meme-picker .mp-cell {
     width: 100% !important;
     height: auto !important;
     aspect-ratio: 1 !important;
   }
   /* dsh-meme 网格右侧滚动条：默认 WebKit 滚动条在手机上看太粗,压成 4px
      细条——保留滚动指示又不占横向空间,thumb 圆角浅色、轨道透明。 */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) .meme-picker .mp-grid::-webkit-scrollbar {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) .meme-picker .mp-grid::-webkit-scrollbar {
     width: 4px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) .meme-picker .mp-grid::-webkit-scrollbar-thumb {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) .meme-picker .mp-grid::-webkit-scrollbar-thumb {
     background: var(--dsw-alias-label-tertiary, rgba(0, 0, 0, .3)) !important;
     border-radius: 999px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) .meme-picker .mp-grid::-webkit-scrollbar-track {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) .meme-picker .mp-grid::-webkit-scrollbar-track {
     background: transparent !important;
   }
 
@@ -993,7 +993,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
     order: 0 !important;
   }
   /* ===== 市场卡片图片容器：横向滚动 ===== */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="cardShots"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="cardShots"] {
   display: flex !important;
   flex-wrap: nowrap !important;
   overflow-x: auto !important;
@@ -1005,7 +1005,7 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
   gap: 8px !important;
   padding: 4px 0 !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="cardShots"] > [class*="cardShot"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="cardShots"] > [class*="cardShot"] {
   flex: 0 0 min(100%, 420px) !important;
   width: min(100%, 420px) !important;
   max-width: 100% !important;
@@ -1013,10 +1013,10 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
   display: block !important;
   object-fit: contain !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="cardShots"]::-webkit-scrollbar {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="cardShots"]::-webkit-scrollbar {
   height: 4px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) [class*="cardShots"]::-webkit-scrollbar-thumb {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="cardShots"]::-webkit-scrollbar-thumb {
   background: var(--ds-border-color, #ccc) !important;
   border-radius: 4px !important;
 }
@@ -1035,51 +1035,51 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      this whole block lives inside the mobile media query.
      (Port of community fork fix 2ff7976.) */
 
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-panel {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-panel {
     min-width: 0 !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
   }
   /* Titlebar: single compact row; path truncates, secondary meta hides on
      narrow, the 5-button action row wraps to two rows of tall targets. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-titlebar {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-titlebar {
     gap: 4px !important;
     padding: 6px 8px !important;
     flex-wrap: nowrap !important;
     min-width: 0 !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-titlebar-path {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-titlebar-path {
     min-width: 0 !important;
     padding-right: 4px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-path {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-path {
     font-size: 13px !important;
     min-width: 0 !important;
     max-width: 220px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-titlebar-actions {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-titlebar-actions {
     flex-wrap: wrap !important;
     gap: 4px !important;
     justify-content: flex-end !important;
     margin-left: auto !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-toolbar-btn {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-toolbar-btn {
     min-height: 34px !important;
     padding: 0 10px !important;
     font-size: 13px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-icon-btn,
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-back-btn {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-icon-btn,
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-back-btn {
     min-height: 34px !important;
     min-width: 34px !important;
   }
   @media (max-width: 480px) {
-    :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-meta {
+    :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-meta {
       display: none !important;
     }
   }
   /* Status bar: wrap, safe-area bottom padding, compact. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-statusbar {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-statusbar {
     flex-wrap: wrap !important;
     gap: 4px 10px !important;
     padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px)) !important;
@@ -1087,42 +1087,42 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
   }
   /* Content scrollers must own horizontal scrolling; the flex columns and the
      renderer stack must not let content push the panel wide. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-renderer,
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-renderer-stack,
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-scroll,
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-csv-scroll,
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-code-body {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-renderer,
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-renderer-stack,
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-scroll,
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-csv-scroll,
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-code-body {
     min-width: 0 !important;
     max-width: 100% !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-scroll,
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-csv-scroll {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-scroll,
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-csv-scroll {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
   /* Browser / subtoolbar rows wrap; file rows get touch-friendly height. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-browser-nav,
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-subtoolbar {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-browser-nav,
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-subtoolbar {
     flex-wrap: wrap !important;
     gap: 6px !important;
     padding: 4px 8px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-file-row {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-file-row {
     min-height: 44px !important;
     padding: 8px 10px !important;
   }
-  :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] .dsfv-file-list [class*="name"] {
+  :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] .dsfv-file-list [class*="name"] {
     min-width: 0 !important;
   }
   /* Produced-file chips render in the conversation tail, outside the viewer
      tab — keep tappable but not scoped to the marker. */
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) .dsfv-produced-chip,
-  :is([data-dsh-frame], [data-mobile-nav="frame"]) .dsfv-produced-folder {
+  :is([data-mobile-nav="frame"], [class*="_frame"]) .dsfv-produced-chip,
+  :is([data-mobile-nav="frame"], [class*="_frame"]) .dsfv-produced-folder {
     min-height: 40px !important;
     padding: 0 12px !important;
   }
   @media (prefers-reduced-motion: reduce) {
-    :is([data-dsh-frame], [data-mobile-nav="frame"])[data-file-viewer-open] [class*="dsfv-"] {
+    :is([data-mobile-nav="frame"], [class*="_frame"])[data-file-viewer-open] [class*="dsfv-"] {
       transition: none !important;
       animation: none !important;
     }

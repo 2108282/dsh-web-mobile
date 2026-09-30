@@ -14,13 +14,15 @@ test('MOBILE_CSS intactly concatenates all 4 original style sheets', () => {
   assert.ok(MOBILE_CSS.includes(MISC_CSS))
 })
 
-test('Sidebar is removed and hidden in mobile layout', () => {
-  assert.match(LAYOUT_CSS, /\[data-pane="sidebar"\]/)
+test('Sidebar rail and handle are completely hidden in mobile layout', () => {
+  assert.match(LAYOUT_CSS, /\[class\*="_sidebarCol"\]/)
   assert.match(LAYOUT_CSS, /display:\s*none\s*!important/)
+  assert.match(LAYOUT_CSS, /\[class\*="_handle"\]/)
 })
 
-test('Styles support native data-dsh-frame attribute', () => {
-  assert.match(LAYOUT_CSS, /\[data-dsh-frame\]/)
+test('Styles support both native _frame class and data-mobile-nav frame attribute', () => {
+  assert.match(LAYOUT_CSS, /\[class\*="_frame"\]/)
+  assert.match(LAYOUT_CSS, /grid-template-columns:\s*minmax\(0,\s*1fr\)\s*0\s*0/)
 })
 
 test('Client entry exports clean inject array without UI dependencies', () => {
