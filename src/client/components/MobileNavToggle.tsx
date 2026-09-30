@@ -7,11 +7,11 @@ export interface MobileNavToggleProps extends PropsRuntime<'conversation.session
 }
 
 /**
- * Mobile navigation buttons:
- * - toggle: opens the left sidebar drawer (Panel Left Icon)
- * - files: opens the files management panel (Folder Open Icon)
+ * Mobile navigation controls:
+ * - toggle: opens the left drawer sidebar
+ * - files: opens the files management sheet
  *
- * Drawn with refined, modern, beautiful vector SVGs.
+ * Drawn with refined modern vector SVGs.
  */
 export function MobileNavToggle({ toggleSidebar, t }: MobileNavToggleProps) {
   const toggleExplorer = (): void => {
@@ -27,20 +27,21 @@ export function MobileNavToggle({ toggleSidebar, t }: MobileNavToggleProps) {
         title={t ? t('open') : '打开侧边栏'}
         onClick={() => toggleSidebar()}
       >
-        {/* 精致左侧侧边栏分栏展开矢量图标 */}
+        {/* 高颜值现代侧边栏抽屉矢量图标（圆角分栏与视窗设计） */}
         <svg
           width="18"
           height="18"
-          viewBox="0 0 20 20"
+          viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth="1.9"
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <rect x="3" y="3.5" width="14" height="13" rx="2.5" />
-          <line x1="7.5" y1="3.5" x2="7.5" y2="16.5" />
+          <rect x="3" y="3" width="18" height="18" rx="4" />
+          <path d="M9 3v18" />
+          <path d="M14 9l3 3-3 3" />
         </svg>
       </button>
 
@@ -51,19 +52,19 @@ export function MobileNavToggle({ toggleSidebar, t }: MobileNavToggleProps) {
         title={t ? t('files') : '文件管理'}
         onClick={toggleExplorer}
       >
-        {/* 精致现代圆角文件夹管理矢量图标 */}
+        {/* 高颜值现代文件夹矢量图标 */}
         <svg
           width="18"
           height="18"
-          viewBox="0 0 20 20"
+          viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.6"
+          strokeWidth="1.9"
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M3.5 5.5A1.5 1.5 0 0 1 5 4h3.1a1.5 1.5 0 0 1 1.06.44L10.7 6H15a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 14.5v-9Z" />
+          <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
         </svg>
       </button>
     </>

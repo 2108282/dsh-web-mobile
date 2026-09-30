@@ -4,24 +4,20 @@
 export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND touch-primary pointer) ---------- */
 
 @media (max-width: 1023px) {
-  /* 彻底移除左侧侧边栏 rail、手柄及一切关联容器 */
-  [class*="_sidebarCol"],
+  /* 隐藏原生拖拽手柄及原生鲸鱼开关，避免与移动端自适应抽屉按钮重叠冲突 */
   [class*="_handle"],
-  [data-pane="sidebar"],
   [data-dsh-responsive-part="sidebar-toggle"],
-  button[aria-label*="sidebar" i],
-  button[aria-label*="侧边栏"] {
+  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-dsh-responsive-part="sidebar-toggle"],
+  html :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="hHd-Xa_toggle"]:is([aria-label*="sidebar" i], [aria-label*="侧边栏"]),
+  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-conversation-header-leading] button[aria-label*="sidebar" i],
+  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-conversation-header-leading] button[aria-label*="侧边栏"],
+  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-shell-leading] button[aria-label*="sidebar" i],
+  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-shell-leading] button[aria-label*="侧边栏"] {
     display: none !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    transform: none !important;
   }
 
-  /* 宿主主 Frame 强制单列，消除左侧 56px/280px 侧边栏列 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) {
+  /* 宿主主 Frame 强制单列：左侧侧边栏脱离网格流浮动抽屉化，主会话占满全屏 */
+  html :is([data-mobile-nav="frame"], [class*="_frame"]) {
     grid-template-columns: minmax(0, 1fr) 0 0 !important;
   }
 

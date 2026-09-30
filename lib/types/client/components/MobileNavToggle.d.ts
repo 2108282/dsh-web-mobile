@@ -4,11 +4,11 @@ export interface MobileNavToggleProps extends PropsRuntime<'conversation.session
     toggleSidebar: () => void;
 }
 /**
- * Mobile navigation buttons:
- * - toggle: opens the left sidebar drawer (Panel Left Icon)
- * - files: opens the files management panel (Folder Open Icon)
+ * Mobile navigation controls:
+ * - toggle: opens the left drawer sidebar
+ * - files: opens the files management sheet
  *
- * Drawn with refined, modern, beautiful vector SVGs.
+ * Drawn with refined modern vector SVGs.
  */
 export declare function MobileNavToggle({ toggleSidebar, t }: MobileNavToggleProps): import("react").JSX.Element;
 //# sourceMappingURL=MobileNavToggle.d.ts.map

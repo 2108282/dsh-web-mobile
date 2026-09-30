@@ -1,51 +1,55 @@
 import type { MouseEvent } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import { IconPaperclip } from '../core/icon-compat.ts'
 import { NS } from '../i18n/locales.ts'
 
+/** Full props for the composer file entry. */
 export interface ComposerFileButtonProps extends PropsRuntime<'conversation.input.left'>, PropsLocale<typeof NS> {}
 
 /**
- * Mobile composer file entry button.
- * Contributed into conversation.input.left slot beside the plus button.
- * Drawn with refined, modern, beautiful paperclip vector SVG.
+ * Mobile-only composer file entry, kept visible outside the "+" command menu.
+ *
+ * The 0.1.6-alpha.2 host deleted the composer's paperclip attach button: the
+ * only file entry left is the 「文件」row inside the "+" listbox (the trigger's
+ * aria-label is 「添加文件或调用指令」). The host still mounts its own hidden
+ * `input[type=file]` in the composer tool row and its own command opens the
+ * native dialog with exactly `fileInputRef.current?.click()`, so this control
+ * triggers that same input instead of reimplementing intake: file validation,
+ * upload and the availability policy all stay host-owned.
+ *
+ * The control is contributed to the host-declared `conversation.input.left`
+ * list slot ("Compact controls at the left of the composer tool row"), which
+ * keeps it inside the tools lane beside the plus button without touching
+ * host-owned React DOM. The seat is session-scoped, so the hero/blank phase
+ * (no session) keeps the "+" menu as its only file entry.
+ *
+ * Availability mirrors the host's `canAcceptDrop` as far as it is observable:
+ * a non-plain input phase (adjudicating/claimed/submitting = the machine is
+ * busy) and a subagent session both refuse attachments. The host's own
+ * `locked` / `addFiles === undefined` arms are package-private, so a missing
+ * session seat also disables the control. Hidden entirely on wide screens
+ * (CSS media query, and the shared desktop hide block in misc.css.ts).
  */
 export function ComposerFileButton({ useInput, useSession, t }: ComposerFileButtonProps) {
-  const busy = useInput?.((state: any) => state.phase !== 'plain') ?? false
-  const subagent = useSession?.((state: any) => state.subagent !== null) ?? false
+  const busy = useInput((state) => state.phase !== 'plain')
+  const subagent = useSession((state) => state.subagent !== null)
   const disabled = busy || subagent
-
   const openPicker = (event: MouseEvent<HTMLButtonElement>): void => {
     if (disabled) return
-    const card = event.currentTarget.closest('[data-composer-card]') || document.querySelector('[data-composer-card]')
-    const input = card?.querySelector<HTMLInputElement>('input[type=file]')
-    if (input) {
-      input.click()
-    }
+    const card = event.currentTarget.closest('[data-composer-card]')
+    const input = card === null ? null : card.querySelector<HTMLInputElement>('input[type=file]')
+    if (input !== null) input.click()
   }
-
   return (
     <button
       type="button"
       data-mobile-nav="file-upload"
-      aria-label={t ? t('fileUpload') : '上传文件'}
-      title={t ? t('fileUpload') : '上传文件'}
+      aria-label={t('fileUpload')}
+      title={t('fileUpload')}
       disabled={disabled}
       onClick={openPicker}
     >
-      {/* 精致优雅倾斜回形针矢量图标 */}
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 20 20"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M14.5 9.5l-6.1 6.1a3.5 3.5 0 0 1-4.9-4.9l7.5-7.5a2.5 2.5 0 0 1 3.5 3.5l-7.5 7.5a1.2 1.2 0 0 1-1.7-1.7l6.5-6.5" />
-      </svg>
+      <IconPaperclip size={16} />
     </button>
   )
 }
