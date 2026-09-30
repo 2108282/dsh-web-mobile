@@ -172,7 +172,7 @@ export const BASE_CSS = `
    drawer covered its left 272px (measured: elementFromPoint inside that band hit
    the drawer's own button, and the confirm card is 358px wide starting at x=8). */
 @media (max-width: 1023px) and (pointer: coarse) {
-  body:has([data-mobile-nav="frame"]:not([data-sidebar-collapsed])) [role="menu"] {
+  body:has(:is([data-dsh-frame], [data-mobile-nav="frame"]):not([data-sidebar-collapsed])) [role="menu"] {
     z-index: 1400 !important;
   }
   /* Host modal dialogs (workspace rename, and any future dialog of the same
@@ -226,7 +226,7 @@ export const BASE_CSS = `
      (Escape-linked dismissal) and the badge only renders in the open drawer,
      so the open-drawer gate covers the panel's only reachable state; the
      closed-drawer and desktop stacks keep the plugin's own ordering. */
-  body:has([data-mobile-nav="frame"]:not([data-sidebar-collapsed]))
+  body:has(:is([data-dsh-frame], [data-mobile-nav="frame"]):not([data-sidebar-collapsed]))
     [data-usage-stats-panel] {
     z-index: 1400 !important;
   }
@@ -244,7 +244,7 @@ export const BASE_CSS = `
      usage-stats panel 100): each is a per-surface adaptation patch for a
      portal OUTSIDE this layer. Closed-drawer and desktop stacks keep the
      host's own ordering. */
-  body:has([data-mobile-nav="frame"]:not([data-sidebar-collapsed]))
+  body:has(:is([data-dsh-frame], [data-mobile-nav="frame"]):not([data-sidebar-collapsed]))
     [class*="_overlayLayer"] {
     z-index: 1400 !important;
   }
