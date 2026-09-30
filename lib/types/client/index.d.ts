@@ -1,14 +1,16 @@
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client';
-export declare const inject: never[];
+import type { MobileNavKey } from './i18n/locales.ts';
+declare module '@deepseek-ai/dsh-client-ui-slots' {
+    interface LocaleNamespaceMap {
+        'mobileNav': MobileNavKey;
+    }
+}
+export declare const inject: string[];
 /**
  * Mobile adaptation plugin (clear branch):
- * - Top header UI reconstruction (CSS)
- * - Composer elements layout (CSS)
- * - Bottom elements layout (CSS)
- * - Remove left sidebar completely (CSS)
- *
- * Zero DOM tree manipulation, zero MutationObserver, zero gesture interception.
- * Preserves 100% native WebView smoothness.
+ * - Top header left/right navigation buttons (MobileNavToggle)
+ * - Composer file upload paperclip button (ComposerFileButton)
+ * - Pure static layout & styling (zero MutationObserver, zero touch interception)
  */
 export declare function apply(ctx: ClientContext): void;
 //# sourceMappingURL=index.d.ts.map
