@@ -1127,6 +1127,28 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
       animation: none !important;
     }
   }
+
+  /* ---------- dsh-agy (Antigravity) mobile layout safeguard ----------
+     1. In mobile settings sheet, release the nested 300px scroller on .agy-rows
+        so the list expands naturally and uses the sheet's smooth scrolling.
+     2. Ensure action buttons (especially Delete at the edge) have safe touch targets,
+        manipulation touch-action, higher z-index, and never get obscured by scrollbars. */
+  [aria-modal="true"] .agy-split .agy-rows {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+  [aria-modal="true"] .agy-rowactions {
+    max-width: 100% !important;
+  }
+  [aria-modal="true"] .agy-rowbtns {
+    margin-left: auto !important;
+  }
+  [aria-modal="true"] .agy-btn,
+  [aria-modal="true"] .agy-rowactions button {
+    touch-action: manipulation !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
 }
 
 `
