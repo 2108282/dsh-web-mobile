@@ -2220,8 +2220,12 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      "打开配置文件") is completely hidden and disabled on phones: it is rarely
      needed here, and tapping or gesturing near it would accidentally invoke
      external Android file viewers to open cordis.patch.yml. */
+  [data-slot="settings.action"],
+  [class*="me01iq_action"],
+  [data-shortcut-modal="settings"] [class*="action"],
   [data-shortcut-modal="settings"] [class*="_actions"],
-  [aria-modal="true"] [class*="_header"]:not([class*="_headerActions"]) [class*="_actions"],
+  [aria-modal="true"] [class*="_header"]:not([class*="_headerActions"]) [class*="action"],
+  [aria-modal="true"]:has(> :first-child > :last-child > button):not(:has([role="navigation"])):not(:has([class*="ZuhsRW"])):not([data-shortcut-modal="shortcuts"]) > :last-child > [class*="_header"]:not([class*="_headerActions"]) [class*="action"],
   [aria-modal="true"]:has(> :first-child > :last-child > button):not(:has([role="navigation"])):not(:has([class*="ZuhsRW"])):not([data-shortcut-modal="shortcuts"]) > :last-child > [class*="_header"]:not([class*="_headerActions"]) [class*="_actions"] {
     display: none !important;
     pointer-events: none !important;

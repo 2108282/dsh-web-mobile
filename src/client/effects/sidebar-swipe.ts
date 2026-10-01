@@ -1349,20 +1349,19 @@ function endStroke(
     markStrokeConsumed(event.target)
     cooldownUntil = performance.now() + COOLDOWN_MS
   }
-  if (modal && Math.abs(dx) > 20) {
-    // Gesturing on a modal: consume synthetic click so release never clicks buttons underneath or in header
+  if (modal) {
+    // Gesturing on a modal: ALWAYS consume synthetic click so release never clicks buttons underneath or in header
     markStrokeConsumed(event.target)
-    // If user performed a rightward back swipe (dx > 40), treat it as closing the modal
-    if (dx > 40) {
+    // If user performed a rightward back swipe (dx > 30), trigger modal close
+    if (dx > 30) {
       const modalEl = document.querySelector('[aria-modal="true"]')
       const closeBtn = modalEl?.querySelector<HTMLElement>(
-        'button[aria-label*="close" i], button[aria-label*="关闭" i], [class*="_closeButton"]'
+        '[class*="VOzbGW_close"], [class*="_close"], button[aria-label*="close" i], button[aria-label*="关闭" i]'
       )
       if (closeBtn) {
         closeBtn.click()
-      } else {
-        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
       }
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true, cancelable: true }))
     }
     return
   }

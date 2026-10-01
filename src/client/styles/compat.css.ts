@@ -478,6 +478,17 @@ export const COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
      :has(> :first-child > :last-child > button) gate (settings sheet only;
      export dialog and directory picker stay excluded). Nothing to restore
      here — do not re-add behind a frame selector. */
+  /* Completely hide the openDocument config file button on all mobile screens */
+  [data-slot="settings.action"],
+  [class*="me01iq_action"],
+  [role="dialog"] button:has(svg):has(path[d*="M14"]),
+  button[title*="配置文件"],
+  button[aria-label*="配置文件"] {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+
   /* Setting rows: no mobile rework — the host renders compact space-between
      rows natively (.Pt1bsG_row: text left, control right, 16px vertical
      padding, .5px divider). The previous "stack each row" rule family

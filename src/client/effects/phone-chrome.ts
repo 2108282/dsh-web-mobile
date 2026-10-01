@@ -942,10 +942,33 @@ export function installOverlayInteractions(ctx: ClientContext): void {
     const onDshaSessionOpen = (): void => {
       if (drawerOpen()) toggleSidebar()
     }
+
+    // 绝对禁止在手机端调用外部编辑器打开配置文件（cordis.patch.yml），捕获阶段直接拦截
+    const onPreventOpenConfig = (event: MouseEvent): void => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      const btn = target.closest('button, [role="button"]')
+      if (btn === null) return
+      const text = btn.textContent ?? ''
+      const title = btn.getAttribute('title') ?? ''
+      const aria = btn.getAttribute('aria-label') ?? ''
+      if (
+        text.includes('配置文件') ||
+        text.includes('configuration file') ||
+        title.includes('配置文件') ||
+        aria.includes('配置文件') ||
+        btn.closest('[data-slot="settings.action"], [class*="me01iq_action"]') !== null
+      ) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    }
+
     document.addEventListener('dsha-session-open', onDshaSessionOpen)
     document.addEventListener('dblclick', onDrawerDoubleClick, true)
     document.addEventListener('keydown', onKeyDown, true)
     document.addEventListener('click', onDrawerClick, true)
+    document.addEventListener('click', onPreventOpenConfig, true)
     document.addEventListener('pointerdown', onDrawerPointerDown, true)
     document.addEventListener('pointermove', onDrawerPointerMove, true)
     document.addEventListener('pointerleave', onDrawerPointerLeave, true)
@@ -960,6 +983,7 @@ export function installOverlayInteractions(ctx: ClientContext): void {
       document.removeEventListener('dblclick', onDrawerDoubleClick, true)
       document.removeEventListener('keydown', onKeyDown, true)
       document.removeEventListener('click', onDrawerClick, true)
+      document.removeEventListener('click', onPreventOpenConfig, true)
       document.removeEventListener('pointerdown', onDrawerPointerDown, true)
       document.removeEventListener('pointermove', onDrawerPointerMove, true)
       document.removeEventListener('pointerleave', onDrawerPointerLeave, true)
