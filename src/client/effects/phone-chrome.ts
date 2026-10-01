@@ -964,88 +964,6 @@ export function installOverlayInteractions(ctx: ClientContext): void {
       }
     }
 
-    // Modal（设置面板等）专用的 Android 系统全面屏手势返回治理
-    const isSettingsModalOpen = (): boolean =>
-      document.querySelector('[data-shortcut-modal="settings"], [aria-modal="true"], [role="dialog"]') !== null
-
-    const closeCurrentModal = (): boolean => {
-      const modal = document.querySelector('[data-shortcut-modal="settings"], [aria-modal="true"], [role="dialog"]')
-      if (modal === null) return false
-      const closeBtn = modal.querySelector<HTMLElement>(
-        '[class*="VOzbGW_close"], [class*="_close"], button[aria-label*="close" i], button[aria-label*="关闭" i]'
-      )
-      if (closeBtn) {
-        closeBtn.click()
-        return true
-      }
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true, cancelable: true }))
-      return true
-    }
-
-    let modalHistoryArmed = false
-    let selfBackPending = false
-    let selfBackTimer: number | null = null
-
-    const clearSelfBack = (): void => {
-      selfBackPending = false
-      if (selfBackTimer !== null) {
-        window.clearTimeout(selfBackTimer)
-        selfBackTimer = null
-      }
-    }
-
-    const selfBack = (): void => {
-      selfBackPending = true
-      if (selfBackTimer !== null) window.clearTimeout(selfBackTimer)
-      selfBackTimer = window.setTimeout(clearSelfBack, 1200)
-      try {
-        history.back()
-      } catch {
-        clearSelfBack()
-      }
-    }
-
-    const onModalPopState = (): void => {
-      if (selfBackPending) {
-        clearSelfBack()
-        return
-      }
-      if (!modalHistoryArmed) return
-      modalHistoryArmed = false
-      // 用户触发了 Android 系统级边缘侧滑返回手势，消费该状态并关闭设置弹窗
-      closeCurrentModal()
-    }
-    window.addEventListener('popstate', onModalPopState)
-
-    // 只要设置弹窗挂载就立即压入虚拟 history，弹窗关闭时若用户点 ✕ 则主动退栈
-    const syncModalHistory = (): void => {
-      const open = isSettingsModalOpen()
-      if (open) {
-        if (modalHistoryArmed) return
-        modalHistoryArmed = true
-        try {
-          history.pushState({ mobileSettingsModal: true }, '')
-        } catch {
-          modalHistoryArmed = false
-        }
-      } else if (modalHistoryArmed) {
-        modalHistoryArmed = false
-        selfBack()
-      }
-    }
-
-    // 初始立即检查一次
-    syncModalHistory()
-
-    // 仅监听 document.body 直接子节点变化（subtree: false，对流式吐字 0 唤起、0 损耗）
-    let modalObserver: MutationObserver | null = null
-    if (typeof document !== 'undefined' && document.body) {
-      modalObserver = new MutationObserver(() => {
-        syncModalHistory()
-      })
-      modalObserver.observe(document.body, { childList: true, subtree: false })
-    }
-
     document.addEventListener('dsha-session-open', onDshaSessionOpen)
     document.addEventListener('dblclick', onDrawerDoubleClick, true)
     document.addEventListener('keydown', onKeyDown, true)
@@ -1061,17 +979,7 @@ export function installOverlayInteractions(ctx: ClientContext): void {
       disarmCloseOnNav()
       touchDownAt = null
       clearPress()
-      clearSelfBack()
-      if (modalObserver !== null) {
-        modalObserver.disconnect()
-        modalObserver = null
-      }
-      if (modalHistoryArmed) {
-        modalHistoryArmed = false
-        selfBack()
-      }
       document.removeEventListener('dsha-session-open', onDshaSessionOpen)
-      window.removeEventListener('popstate', onModalPopState)
       document.removeEventListener('dblclick', onDrawerDoubleClick, true)
       document.removeEventListener('keydown', onKeyDown, true)
       document.removeEventListener('click', onDrawerClick, true)

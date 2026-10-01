@@ -17,6 +17,7 @@ import { installModelMenuAnchor } from './effects/model-menu-anchor.ts'
 import { installShortcutModalKeyboardGuard } from './effects/shortcut-modal-keyboard-guard.ts'
 import { installAionuiCompat } from './effects/aionui-compat.ts'
 import { createPanelExit, installPanelRowExit } from './effects/panel-exit.ts'
+import { installSettingsBackExit } from './effects/settings-back-exit.ts'
 import { installDebugBadge } from './debug.ts'
 import { NS, en, zh } from './i18n/locales.ts'
 import type { MobileNavKey } from './i18n/locales.ts'
@@ -140,6 +141,8 @@ export function apply(ctx: ClientContext): void {
   installShortcutModalKeyboardGuard(ctx)
 
   installPhoneChrome(ctx)
+
+  installSettingsBackExit(ctx)
 
   installAionuiCompat(ctx)
 
