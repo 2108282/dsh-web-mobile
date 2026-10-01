@@ -68,7 +68,9 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      which sheet happens to be injected later. Measured before and after with
      scripts/probes/cascade-conflict-probe.mjs: no computed value moves, the
      rule only stops depending on sheet order (audit D-5 option A). */
-  html [data-mobile-nav="frame"] {
+  html [data-mobile-nav="frame"],
+  html:has([data-mobile-nav]) [class*="pI_x6G_frame"],
+  html:has([data-mobile-nav]) [class*="frame"]:has(> [class*="sidebarCol"]) {
     box-sizing: border-box !important;
     position: relative !important;
     grid-template-columns: minmax(0, 1fr) 0 0 !important;
@@ -179,7 +181,9 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      a min(88vw, 280px) column translated -110% of its own width, i.e. -308px
      at 390px. The gesture layer never depended on this rule - it writes an
      inline transform !important - so only the CSS-driven click paths regressed. */
-  [data-mobile-nav="frame"][data-sidebar-collapsed] > :first-child {
+  [data-mobile-nav="frame"][data-sidebar-collapsed] > :first-child,
+  html:has([data-mobile-nav]) [class*="frame"][data-sidebar-collapsed] > [class*="sidebarCol"],
+  html:has([data-mobile-nav]) [class*="frame"][data-sidebar-collapsed] > :first-child {
     width: min(88vw, 280px) !important;
     transform: translateX(-110%) !important;
   }
@@ -193,7 +197,8 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      overflow:hidden drawer to scrollLeft=102, and every static child (plus the
      fixed overlay) shifts 102px off-screen. With transform:none the overlay is
      viewport-anchored: it dims the full screen and the sheet sits at left:8. */
-  [data-mobile-nav="frame"]:not([data-sidebar-collapsed]) > :first-child {
+  [data-mobile-nav="frame"]:not([data-sidebar-collapsed]) > :first-child,
+  html:has([data-mobile-nav]) [class*="frame"]:not([data-sidebar-collapsed]) > [class*="sidebarCol"] {
     transform: none !important;
   }
 
@@ -2221,12 +2226,8 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      needed here, and tapping or gesturing near it would accidentally invoke
      external Android file viewers to open cordis.patch.yml. */
   [data-slot="settings.action"],
-  [class*="me01iq_action"],
-  [data-shortcut-modal="settings"] [class*="action"],
-  [data-shortcut-modal="settings"] [class*="_actions"],
-  [aria-modal="true"] [class*="_header"]:not([class*="_headerActions"]) [class*="action"],
-  [aria-modal="true"]:has(> :first-child > :last-child > button):not(:has([role="navigation"])):not(:has([class*="ZuhsRW"])):not([data-shortcut-modal="shortcuts"]) > :last-child > [class*="_header"]:not([class*="_headerActions"]) [class*="action"],
-  [aria-modal="true"]:has(> :first-child > :last-child > button):not(:has([role="navigation"])):not(:has([class*="ZuhsRW"])):not([data-shortcut-modal="shortcuts"]) > :last-child > [class*="_header"]:not([class*="_headerActions"]) [class*="_actions"] {
+  [aria-modal="true"]:has(> :first-child > :last-child > button):not(:has([role="navigation"])):not(:has([class*="ZuhsRW"])):not([data-shortcut-modal="shortcuts"]) > :last-child > [class*="_header"]:not([class*="_headerActions"]) > [class*="_actions"],
+  [aria-modal="true"]:has(> :first-child > :last-child > button):not(:has([role="navigation"])):not(:has([class*="ZuhsRW"])):not([data-shortcut-modal="shortcuts"]) > :last-child > [class*="_header"]:not([class*="_headerActions"]) > [data-slot="settings.action"] {
     display: none !important;
     pointer-events: none !important;
     visibility: hidden !important;

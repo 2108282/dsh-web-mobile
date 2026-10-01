@@ -266,13 +266,17 @@ export function installReconciler(ctx: ClientContext): () => void {
       for (const record of records) {
         if (record.type === 'attributes' && record.attributeName !== null) {
           keys.add(record.attributeName)
+        } else if (record.type === 'childList') {
+          attachFrame()
         }
       }
       if (keys.size > 0) core.note(keys)
     })
+    let observedFrame: HTMLElement | null = null
     const attachFrame = (): void => {
       const f = getFrame()
-      if (f !== null) {
+      if (f !== null && f !== observedFrame) {
+        observedFrame = f
         observer.observe(f, {
           attributes: true,
           attributeFilter: [
@@ -283,6 +287,7 @@ export function installReconciler(ctx: ClientContext): () => void {
             'data-mobile-preview-full',
           ],
         })
+        core.note(new Set(['data-sidebar-collapsed', 'data-phase']))
       }
     }
     attachFrame()
@@ -776,9 +781,22 @@ export function installOverlayInteractions(ctx: ClientContext): void {
         ? { x: event.clientX, y: event.clientY }
         : null
       clearPress()
+      const target = event.target
+      if (drawerOpen() && target instanceof Element) {
+        const drawer = drawerRoot()
+        const isInsideDrawer = drawer !== null && drawer.contains(target)
+        const isToggleBtn = target.closest(
+          '[data-mobile-nav="toggle"], [data-dsh-responsive-part="sidebar-toggle"], [class*="toggle"], button[aria-label*="sidebar" i], button[aria-label*="侧边栏"]'
+        ) !== null
+        if (!isInsideDrawer && !isToggleBtn) {
+          // 点击右边空白区域准备收起抽屉：拦截 pointerdown 避免焦点转移或软键盘误唤起
+          event.preventDefault()
+          event.stopPropagation()
+          return
+        }
+      }
       if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return
       if (isStrokeLocked()) return
-      const target = event.target
       // isDrawerNavTarget already means "inside the drawer, on a row navigation
       // target, and not on one of its buttons" — and it must stay the
       // exemption-free base: arming long-press through the tap-close predicate
@@ -844,14 +862,32 @@ export function installOverlayInteractions(ctx: ClientContext): void {
       // consume marks do not exist until the gesture layer's own pointerup,
       // which runs AFTER this handler on the same release event.
       if (isStrokeLocked() || consumeIfGestured(event)) return
-      // The backdrop keeps its own listener, but the third-party mobile shim
-      // stops click propagation at the frame for anything outside the drawer
-      // (its own dismiss path), so that listener never sees the tap. Decide
-      // here instead — before both the shim and the element handler.
-      if (target instanceof Element && target.closest('[data-mobile-nav="backdrop"]') !== null) {
-        if (drawerOpen()) toggleSidebar()
-        return
+
+      // 点击抽屉外部空白区域收起抽屉
+      if (drawerOpen() && target instanceof Element) {
+        const drawer = drawerRoot()
+        const isInsideDrawer = drawer !== null && drawer.contains(target)
+        const isToggleBtn = target.closest(
+          '[data-mobile-nav="toggle"], [data-dsh-responsive-part="sidebar-toggle"], [class*="toggle"], button[aria-label*="sidebar" i], button[aria-label*="侧边栏"]'
+        ) !== null
+
+        // 1. 点击遮罩层直接收起
+        if (target.closest('[data-mobile-nav="backdrop"]') !== null) {
+          event.preventDefault()
+          event.stopPropagation()
+          toggleSidebar()
+          return
+        }
+
+        // 2. 点击右侧空出来的位置（不在抽屉内且非开关按钮）：立即收起，并阻止穿透点击背景内容
+        if (!isInsideDrawer && !isToggleBtn) {
+          event.preventDefault()
+          event.stopPropagation()
+          toggleSidebar()
+          return
+        }
       }
+
       // A touch row-tap owns the close (pointerup or the navigation observer);
       // let the row's click reach React without toggling the drawer twice.
       if (performance.now() - lastTouchNavAt < 500) return
@@ -887,6 +923,22 @@ export function installOverlayInteractions(ctx: ClientContext): void {
       }
       const target = event.target
       if (!(target instanceof Element)) return
+
+      // 若在抽屉外抬手：直接触发收起
+      if (drawerOpen()) {
+        const drawer = drawerRoot()
+        const isInsideDrawer = drawer !== null && drawer.contains(target)
+        const isToggleBtn = target.closest(
+          '[data-mobile-nav="toggle"], [data-dsh-responsive-part="sidebar-toggle"], [class*="toggle"], button[aria-label*="sidebar" i], button[aria-label*="侧边栏"]'
+        ) !== null
+        if (!isInsideDrawer && !isToggleBtn) {
+          event.preventDefault()
+          event.stopPropagation()
+          toggleSidebar()
+          return
+        }
+      }
+
       if (!shouldCloseOnTapInsideDrawer(target)) return
 
       const row = target.closest('[role="treeitem"]')
