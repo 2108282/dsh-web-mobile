@@ -3,32 +3,7 @@
 
 export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND touch-primary pointer) ---------- */
 
-@media (max-width: 1023px) {
-  /* 隐藏原生拖拽手柄及原生鲸鱼开关，避免与移动端自适应抽屉按钮重叠冲突 */
-  [class*="_handle"],
-  [data-dsh-responsive-part="sidebar-toggle"],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-dsh-responsive-part="sidebar-toggle"],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="hHd-Xa_toggle"]:is([aria-label*="sidebar" i], [aria-label*="侧边栏"]),
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-conversation-header-leading] button[aria-label*="sidebar" i],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-conversation-header-leading] button[aria-label*="侧边栏"],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-shell-leading] button[aria-label*="sidebar" i],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-shell-leading] button[aria-label*="侧边栏"] {
-    display: none !important;
-  }
-
-  /* 宿主主 Frame 强制单列：左侧侧边栏脱离网格流浮动抽屉化，主会话占满全屏 */
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) {
-    grid-template-columns: minmax(0, 1fr) 0 0 !important;
-  }
-
-  /* 主会话中心列 100% 占满 */
-  [class*="_centerCol"],
-  [data-pane="main"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
+@media (max-width: 1023px) and (pointer: coarse) {
   /* --- Phone chrome ---
      The system status bar stays visible (no fullscreen). Three adjustments
      make it behave:
@@ -93,7 +68,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      which sheet happens to be injected later. Measured before and after with
      scripts/probes/cascade-conflict-probe.mjs: no computed value moves, the
      rule only stops depending on sheet order (audit D-5 option A). */
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) {
+  html [data-mobile-nav="frame"] {
     box-sizing: border-box !important;
     position: relative !important;
     grid-template-columns: minmax(0, 1fr) 0 0 !important;
@@ -120,7 +95,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      position/inset/width on the element, the column kept a correct-looking box
      while neither painting nor hit-testing, which is the "all black, click
      anywhere closes" root cause. The backdrop we append carries the dimming. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) > :first-child {
+  [data-mobile-nav="frame"] > :first-child {
     position: absolute !important;
     inset: 0 auto 0 0 !important;
     /* !important is load-bearing: the host ships
@@ -204,7 +179,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      a min(88vw, 280px) column translated -110% of its own width, i.e. -308px
      at 390px. The gesture layer never depended on this rule - it writes an
      inline transform !important - so only the CSS-driven click paths regressed. */
-  :is([data-mobile-nav="frame"], [class*="_frame"])[data-sidebar-collapsed] > :first-child {
+  [data-mobile-nav="frame"][data-sidebar-collapsed] > :first-child {
     width: min(88vw, 280px) !important;
     transform: translateX(-110%) !important;
   }
@@ -218,7 +193,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      overflow:hidden drawer to scrollLeft=102, and every static child (plus the
      fixed overlay) shifts 102px off-screen. With transform:none the overlay is
      viewport-anchored: it dims the full screen and the sheet sits at left:8. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]):not([data-sidebar-collapsed]) > :first-child {
+  [data-mobile-nav="frame"]:not([data-sidebar-collapsed]) > :first-child {
     transform: none !important;
   }
 
@@ -251,9 +226,9 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      (0,4,1) and ends the tie - the outcome no longer depends on which sheet is
      injected later. The hash class and the label stay as fallbacks for hosts
      without that hook. */
-  html :is([data-mobile-nav="frame"], [class*="_frame"])[data-sidebar-collapsed] [data-pane="sidebar"] [data-dsh-responsive-part="sidebar-toggle"],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-dsh-responsive-part="sidebar-toggle"],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="hHd-Xa_toggle"]:is([aria-label*="sidebar" i], [aria-label*="侧边栏"]),
+  html [data-mobile-nav="frame"][data-sidebar-collapsed] [data-pane="sidebar"] [data-dsh-responsive-part="sidebar-toggle"],
+  html [data-mobile-nav="frame"] [data-dsh-responsive-part="sidebar-toggle"],
+  html [data-mobile-nav="frame"] [class*="hHd-Xa_toggle"]:is([aria-label*="sidebar" i], [aria-label*="侧边栏"]),
   /* The label-only fallbacks MUST stay scoped to the seats the host's own
      drawer handle can live in. Unscoped they match by aria-label substring,
      and the session row's ⋯ carries 会话“<title>”的操作 — so any session
@@ -262,10 +237,10 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      display:none, row height unchanged, time shifted right by the 16px the
      button would have taken). Anchor them to the frame's leading seat and to
      the header's leading cell instead. */
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-conversation-header-leading] button[aria-label*="sidebar" i],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-conversation-header-leading] button[aria-label*="侧边栏"],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-shell-leading] button[aria-label*="sidebar" i],
-  html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-shell-leading] button[aria-label*="侧边栏"] {
+  html [data-mobile-nav="frame"] [data-conversation-header-leading] button[aria-label*="sidebar" i],
+  html [data-mobile-nav="frame"] [data-conversation-header-leading] button[aria-label*="侧边栏"],
+  html [data-mobile-nav="frame"] [data-shell-leading] button[aria-label*="sidebar" i],
+  html [data-mobile-nav="frame"] [data-shell-leading] button[aria-label*="侧边栏"] {
     display: none !important;
   }
 
@@ -296,7 +271,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      (audit S2 2026-08-27 — the old reduce block only covered the settings
      sheet and its mask). Same idiom as the animation:none blocks below. */
   @media (prefers-reduced-motion: reduce) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) > :first-child {
+    [data-mobile-nav="frame"] > :first-child {
       transition: none !important;
     }
   }
@@ -330,6 +305,15 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     display: none !important;
     width: 0;
     height: 0;
+  }
+
+  /* Long-conversation off-screen rendering optimization:
+     In long sessions with dozens of turns and thousands of DOM nodes,
+     content-visibility: auto skips layout and paint for off-screen message
+     items during streaming token updates, preventing main-thread lag. */
+  [data-phase] [class*="_flowItem"] {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 120px;
   }
   /* Message action rows (copy / run-time badges) can overflow the right
      edge on narrow screens — keep them inside the message width. */
@@ -557,7 +541,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      display:contents 包装（真机探针：modes[55,44] > div[contents] > root[55,44]），
      所以「_modes > _trigger」这类直接子代锚点命不中（上一版改了没反应），
      必须用哈希后代锚点；哈希变了整条自动失效，不会误伤别家。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] [class*="iWlSmW_trigger"] {
+  [data-mobile-nav="frame"] [data-phase] [class*="iWlSmW_trigger"] {
     padding: 0 !important;
     gap: 0 !important;
   }
@@ -566,7 +550,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      的 width/height 都是 14px），与 + / 📎 的 16px 不齐。只放大那个包装里的
      svg：⌄ 箭头不在 _triggerIcon 内，不会被一起放大。盒子 28×28 不变（16 仍有余量）。
      注意：本文件是模板字符串，注释里**不能出现反引号**（会劈开 CSS）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] [class*="iWlSmW_triggerIcon"] svg {
+  [data-mobile-nav="frame"] [data-phase] [class*="iWlSmW_triggerIcon"] svg {
     width: 16px !important;
     height: 16px !important;
   }
@@ -828,11 +812,11 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      （那几个包各有 2~9 条 :hover 规则，触摸时 Chromium 会套用）。 */
   /* 覆盖范围放宽：宿主有些控件不是 button（实测输入区里就有 [role=button]、带
      tabindex 的 div 形态），所以三类一起收。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header button,
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="tab"],
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="menuitem"],
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="button"],
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [tabindex],
+  [data-mobile-nav="frame"] [data-phase] header button,
+  [data-mobile-nav="frame"] [data-phase] header [role="tab"],
+  [data-mobile-nav="frame"] [data-phase] header [role="menuitem"],
+  [data-mobile-nav="frame"] [data-phase] header [role="button"],
+  [data-mobile-nav="frame"] [data-phase] header [tabindex],
   [data-composer-card] button,
   [data-composer-card] [role="button"],
   [data-composer-card] [tabindex] {
@@ -844,8 +828,8 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      —— 因为 button 盒比可见胶囊大（芯片文字只占盒的一部分）。所以改成**不改几何**的
      按下效果：整体压暗（.92 ≈ 宿主 token 的观感强度；太淡店主会觉得"没变"）。胶囊类的视觉仍由宿主自己的 chip 背景负责。
      不用 position/伪元素：头部芯片里挂着宿主的弹层，改 position 会挪动包含块。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header button:active,
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="tab"]:active {
+  [data-mobile-nav="frame"] [data-phase] header button:active,
+  [data-mobile-nav="frame"] [data-phase] header [role="tab"]:active {
     filter: brightness(.92);
   }
   /* 头部那些 v 的翻转：**标准模式那个现在会翻** —— 规则在本文件「DSHA 集成层：预设 chip」
@@ -906,15 +890,15 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        卡片 98 -> 78、编辑器 36 -> 32、按钮行 42 -> 36、文字底到按钮顶 29 -> 19px。
      横向 padding（8px）与两个按钮尺寸（28/34px）一律不动，触控目标不变；
      编辑器仍是可增长的多行框（max-height 336px），只是单行时不再垫高。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase="active"] [data-composer-card] {
+  [data-mobile-nav="frame"] [data-phase="active"] [data-composer-card] {
     padding-top: 2px !important;
     gap: 4px !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase="active"] [data-composer-card] [class*="_row"] {
+  [data-mobile-nav="frame"] [data-phase="active"] [data-composer-card] [class*="_row"] {
     padding: 0 8px !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase="active"] [data-composer-card] [data-composer-input],
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase="active"] [data-composer-card] [class*="_scroll"] {
+  [data-mobile-nav="frame"] [data-phase="active"] [data-composer-card] [data-composer-input],
+  [data-mobile-nav="frame"] [data-phase="active"] [data-composer-card] [class*="_scroll"] {
     min-height: 28px !important;
     padding-top: 2px !important;
   }
@@ -932,7 +916,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      x=100 with our rule present, matching and later in source order. The value
      is 0 because our own toggle already occupies that left seat (painted at
      x=8-36), so the host reservation is pure dead space on a phone. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header {
+  [data-mobile-nav="frame"] [data-phase] header {
     padding-left: 0 !important;
     padding-right: 8px !important;
     position: relative !important;
@@ -949,14 +933,14 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      re-hide needs no !important: the grid rule's display is a normal
      declaration and our style tag loads last. The header carries no children in
      hero (drawer entry is the FAB), so hiding it frees the dead 85px too. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header[class*="_headerHidden"] {
+  [data-mobile-nav="frame"] [data-phase] header[class*="_headerHidden"] {
     display: none;
   }
   /* 0.1.6-alpha.2 renamed the hero-empty marker: headerHidden -> headerBlank
      (audit §1 row 3), so the rule above is a dead needle on alpha.2 and this
      one is dead on rc hosts — together they cover both generations. Same
      (0,3,1) shape, same no-!important reasoning as above. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header[class*="headerBlank"] {
+  [data-mobile-nav="frame"] [data-phase] header[class*="headerBlank"] {
     display: none;
   }
   /* Header popovers resolve against the header, not against their 28px flow
@@ -981,7 +965,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      the menu lands at x=8 y=849 — past the 844px viewport (A/B 2026-09-13).
      Scoped to the header actions slot, so the subagent lineage root inside
      the crumbs keeps its own anchored, fixed-position menu. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:not(:has([class*="_headerLeading"])) [class*="_headerActions"] [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) {
+  [data-mobile-nav="frame"] [data-phase] header:not(:has([class*="_headerLeading"])) [class*="_headerActions"] [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) {
     position: static !important;
   }
   /* The tab strip is a separate grid item from the title row and does not
@@ -996,7 +980,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      （仓库既有惯例，见文件末尾的 DSHA 预设块）。
      真机读数（修前 → 修后）：头部 77 → 67px、标题↔页签文字间距 22 → 15px。 */
   @media (max-width: 767px) and (pointer: coarse) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="wSkVaW_tabs"] {
+    [data-mobile-nav="frame"] [data-phase] header [class*="wSkVaW_tabs"] {
       padding-left: 8px !important;
       /* 2026-09-23 店主："标题和下面『对话』中间的空白有点多"。
          宿主给这条页签条 margin-top:10px，页签按钮自己还带 padding-bottom:9px
@@ -1009,7 +993,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
       margin-top: 0 !important;
       margin-bottom: 0 !important;
     }
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="wSkVaW_tabs"] [class*="wSkVaW_tab"] {
+    [data-mobile-nav="frame"] [data-phase] header [class*="wSkVaW_tabs"] [class*="wSkVaW_tab"] {
       padding-bottom: 5px !important;
     }
     /* 真机诊断：页签条的 margin-top 计算值是 4px，但把 document.styleSheets 里
@@ -1017,7 +1001,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        —— 说明这 4px 来自一张读不到 cssRules 的表（跨源，App 自己注入的样式表），
        普通 !important 平级打不过它。所以这里加码：前缀 html + 钉住 header.wSkVaW_header，
        特异性抬到 (0,5,1)，实测能压过（页签条 4 → 0）。 */
-    html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header.wSkVaW_header [class*="wSkVaW_tabs"] {
+    html [data-mobile-nav="frame"] [data-phase] header.wSkVaW_header [class*="wSkVaW_tabs"] {
       margin-top: -4px !important;
     }
     /* 真机读数：头部的 grid-template-rows 被钉成固定的 40px 36px（宿主自己没写行高，
@@ -1026,13 +1010,13 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     /* 标题行实测 40px 高，而里面最高的东西是 36px 的预设 chip（"标准模式"）——
        多出来的 4px 是死空间。让行高回到内容高度（用 auto + min-height:0，
        不写死 36：将来标题簇里出现更高的东西（子代理谱系等）也不会被裁）。 */
-    html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header.wSkVaW_header [class*="wSkVaW_titleRow"] {
+    html [data-mobile-nav="frame"] [data-phase] header.wSkVaW_header [class*="wSkVaW_titleRow"] {
       height: auto !important;
       min-height: 0 !important;
     }
     /* 页签按钮文字上方还有 6px 空白（按钮被容器撑到 32px 高、文字居中）：去掉上内边距，
        下内边距 5px 已在上面钉住（下划线位置不变）。 */
-    html :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header.wSkVaW_header [class*="wSkVaW_tab"] {
+    html [data-mobile-nav="frame"] [data-phase] header.wSkVaW_header [class*="wSkVaW_tab"] {
       padding-top: 0 !important;
       align-self: flex-end !important;
     }
@@ -1045,7 +1029,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      painted partially outside the viewport), so the reclaim lives in exactly
      one place: the header padding. */
 
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header > :first-child {
+  [data-mobile-nav="frame"] [data-phase] header > :first-child {
     display: flex !important;
     align-items: center;
     box-sizing: border-box;
@@ -1056,7 +1040,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        breathing room; the host's 60px rail reservation is neutralised above. */
     padding-left: 40px;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header > :first-child > :first-child {
+  [data-mobile-nav="frame"] [data-phase] header > :first-child > :first-child {
     display: flex !important;
     align-items: center;
     flex: 1 1 auto;
@@ -1090,7 +1074,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     top: 12px !important;
     z-index: 2 !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_headerActions"] {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_headerActions"] {
     display: flex !important;
     align-items: center;
     box-sizing: border-box;
@@ -1109,7 +1093,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      chip in the row, the crumb client width collapsed to 16px and NOTHING of
      the title was painted. 30% of the row keeps 2-4 CJK glyphs plus the host's
      own ellipsis whatever else is pinned next to it. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_crumbs"] {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_crumbs"] {
     flex: 1 1 0;
     min-width: 30%;
     max-width: none;
@@ -1126,7 +1110,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      report: the mode label showed only its glyph). 38vw keeps the label whole
      from 320px up and still lets it ellipsize before the title on wider
      screens. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_label"]:has(> svg) {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_label"]:has(> svg) {
     order: 1;
     flex: 0 1 auto;
     min-width: 0;
@@ -1140,7 +1124,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     text-overflow: ellipsis;
     white-space: nowrap !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_label"]:has(> svg) > svg {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_label"]:has(> svg) > svg {
     position: absolute !important;
     left: 0 !important;
     top: 50% !important;
@@ -1166,7 +1150,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      positioned header: static on its own moved the containing block out to
      the frame and the menu landed at x=8 y=849, past the 844px viewport
      (A/B 2026-09-13). */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) {
     order: 2;
     flex: 0 0 auto;
     min-width: 0;
@@ -1175,17 +1159,17 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     text-overflow: ellipsis;
     white-space: nowrap !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) > button {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) > button {
     min-width: 0;
     max-width: 100%;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) > button > * {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) > button > * {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) > button,
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) > button * {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) > button,
+  [data-mobile-nav="frame"] [data-phase] header [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) > button * {
     white-space: nowrap !important;
   }
   /* The lineage count's leading "/" (ZKlsPq_separator — official desktop
@@ -1193,7 +1177,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      stray extra breadcrumb level on small screens; hide it. The crumbSep "/"
      between ancestry segments (subagent sessions) is a real separator and
      stays. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_crumbs"] [class*="_separator"] {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_crumbs"] [class*="_separator"] {
     display: none !important;
   }
   /* The header's right-hand slot clips its own dropdown away (0.1.5 host bug).
@@ -1209,7 +1193,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      branch and to this one cell, so desktop keeps the host layout. The section
      is hidden on mobile anyway - the drawer footer carries the same action - but
      the release stays for any plugin that registers a header dropdown here. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="wSkVaW_headerUtilities"] {
+  [data-mobile-nav="frame"] [data-phase] header [class*="wSkVaW_headerUtilities"] {
     overflow: visible !important;
     /* The seat is empty on a phone (its only button is hidden just below) yet
        still 44px tall, which floors the whole title row — see the compact-rows
@@ -1217,15 +1201,15 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     height: 30px !important;
     min-height: 0 !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="wSkVaW_headerUtilities"] [class*="nL4_yW_moreButton"] {
+  [data-mobile-nav="frame"] [data-phase] header [class*="wSkVaW_headerUtilities"] [class*="nL4_yW_moreButton"] {
     display: none !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [data-mobile-nav="files"] {
+  [data-mobile-nav="frame"] [data-phase] header [data-mobile-nav="files"] {
     width: 28px;
   }
   /* Session log download: gone from the header row on mobile (the utilities
      seat holds only the session-log-export capsule). */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header > :first-child > :last-child {
+  [data-mobile-nav="frame"] [data-phase] header > :first-child > :last-child {
     display: none !important;
   }
   /* View tabs strip (official [role="tablist"] under the crumbs row).
@@ -1246,7 +1230,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      never scrolls sideways. overscroll-behavior-x: contain stops a flick
      from chaining past the ends; snap keeps tabs edge-aligned after a
      fling; the scrollbar stays hidden like every native tab bar. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="tablist"] {
+  [data-mobile-nav="frame"] [data-phase] header [role="tablist"] {
     flex-wrap: nowrap;
     gap: 0 16px;
     overflow-x: auto;
@@ -1255,10 +1239,10 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     touch-action: pan-x;
     scrollbar-width: none;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="tablist"]::-webkit-scrollbar {
+  [data-mobile-nav="frame"] [data-phase] header [role="tablist"]::-webkit-scrollbar {
     display: none;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="tablist"] > button {
+  [data-mobile-nav="frame"] [data-phase] header [role="tablist"] > button {
     flex-shrink: 0;
     white-space: nowrap;
     scroll-snap-align: start;
@@ -1286,7 +1270,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      the header has 0 element children, so the guard leaves it at its official
      height — measured, the hero composer rect [0,349,388,231] is identical
      with and without this block. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has(> *) {
+  [data-mobile-nav="frame"] [data-phase] header:has(> *) {
     min-height: 0 !important;
     /* 2026-09-23 二轮：页签行地板 32 → 26（店主："标题和下面『对话』中间空白有点多"）。
        标题行地板保持 36 —— 它下面的文字要跟 top:6 的圆形按钮对齐（实测文字中心
@@ -1295,16 +1279,16 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        页签条的下沿随之从 76 收到 66。 */
     grid-template-rows: minmax(36px, auto) minmax(32px, auto) !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="tab"] {
+  [data-mobile-nav="frame"] [data-phase] header [role="tab"] {
     min-height: 32px !important;
   }
   /* 手机档专属（≤767px + coarse）：页签行地板 32 → 26（下划线收到 5px 后仍够点）。
      平板档保留 32px 的既有值，不跟手机一起压。 */
   @media (max-width: 767px) and (pointer: coarse) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has(> *) {
+    [data-mobile-nav="frame"] [data-phase] header:has(> *) {
       grid-template-rows: minmax(36px, auto) minmax(26px, auto) !important;
     }
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [role="tab"] {
+    [data-mobile-nav="frame"] [data-phase] header [role="tab"] {
       min-height: 26px !important;
     }
   }
@@ -1318,7 +1302,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      ending at ~314 with the opener box at 316..352, i.e. the full 44px seat
      plus 2px of breathing room, so restore that instead of narrowing the
      opener: 46px clears the 36px box at right:8 by 2px at every width. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="wSkVaW_titleCluster"] {
+  [data-mobile-nav="frame"] [data-phase] header [class*="wSkVaW_titleCluster"] {
     padding-right: 46px !important;
   }
   /* Header crowding on narrow phones.
@@ -1342,7 +1326,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        Truncating it to a number instead would print the wrong count for a
        double-digit job list, so it is dropped whole — dot, chevron and tap
        target stay. */
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_headerActions"] [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) [class*="_count"] {
+    [data-mobile-nav="frame"] [data-phase] header [class*="_headerActions"] [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) [class*="_count"] {
       display: none !important;
     }
   }
@@ -1350,17 +1334,17 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      together, 390px cannot hold the title, the mode words, the lineage count
      and the job label at once; the job label goes first, above 440px too. */
   @media (max-width: 559px) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_crumbs"] {
+    [data-mobile-nav="frame"] [data-phase] header [class*="_crumbs"] {
       padding-right: 8px;
     }
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_crumbs"] [class*="_root"]) [class*="_headerActions"] [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) [class*="_count"] {
+    [data-mobile-nav="frame"] [data-phase] header:has([class*="_crumbs"] [class*="_root"]) [class*="_headerActions"] [class*="_root"]:not([class*="_switcherRoot"]):has(> button[class*="_trigger"]) [class*="_count"] {
       display: none !important;
     }
   }
   /* Last resort on 320px-class screens: the title and both status chips cannot
      share the row with the mode words, so the mode chip keeps only its icon. */
   @media (max-width: 359px) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_crumbs"] [class*="_root"]):has([class*="_headerActions"] [class*="_root"]) [class*="_label"]:has(> svg) {
+    [data-mobile-nav="frame"] [data-phase] header:has([class*="_crumbs"] [class*="_root"]):has([class*="_headerActions"] [class*="_root"]) [class*="_label"]:has(> svg) {
       display: none !important;
     }
   }
@@ -1375,7 +1359,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      [38,41,336,58] for the lineage menu at 390px, both fully inside the
      viewport. Do NOT clamp with left:8px: measured, that put the panel at
      x=350..686 (off-screen) against a right-anchored x=30..366. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header [class*="_menu"] {
+  [data-mobile-nav="frame"] [data-phase] header [class*="_menu"] {
     left: auto !important;
     right: 8px !important;
     width: min(336px, calc(100vw - 16px));
@@ -1395,7 +1379,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      measured (review 2026-09-19). Every selector therefore carries
      header:has([class*="_headerLeading"]): the whole block is dead on pre-alpha.2 hosts and
      the rc-generation rules keep governing there unchanged. */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) {
     /* 顶部留白收窄：宿主 header 自带 padding-top: 10px、标题行再垫 2px，
        叠在刘海/状态栏避让之上就显空。这两处一起清零。 */
     padding-left: 8px !important;
@@ -1406,7 +1390,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        段空白顶下去、和标签行错开。手机上让 header 贴住内容高度。 */
     min-height: 0 !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) > :first-child {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) > :first-child {
     flex-wrap: nowrap !important;
     align-items: center !important;
     gap: 0 !important;
@@ -1415,7 +1399,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     padding-top: 0 !important;
   }
   /* 目录开关跟着一起上移，保持与标题/按钮同一行居中。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [data-mobile-nav="toggle"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-mobile-nav="toggle"] {
     top: 6px !important;
   }
    /* 空座位不判空、只塌宽：a2 槽位渲染器永远在 headerLeading 里挂一个
@@ -1427,7 +1411,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
       座位于是 0 内容 + 44 padding = 44px 死占（实测 390px：座位
       [40,22,44,0]、titleCluster 被顶到 x=84）。padding 归零后空座位 = 0×0，
       真有内容的宿主也不受影响（内容盒照常渲染）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_headerLeading"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerLeading"] {
     /* 不能塌掉左侧座位本身：上面那条（> :first-child）给本座位留了
        padding-left:32px 作面板开关的座位，而 padding: 0 !important 是
        简写，会把它一并清零。两条规则特异性同为 (0,4,1)，按源序本块在后
@@ -1443,7 +1427,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      写的「header > :first-child > :first-child { flex: 1 1 auto }」现在套在
      这个空座位上，于是它吃掉全部剩余宽度、把标题顶到右侧（实测 411px 宽
      屏幕上标题被推到 131px 处）。让它不参与伸缩即可——有内容时也不会塌。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) > :first-child > :first-child {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) > :first-child > :first-child {
     flex: 0 0 auto !important;
     width: auto !important;
     min-width: 0 !important;
@@ -1461,11 +1445,11 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
       主导行高。QsffPG/ZKlsPq 两个状态 chip 用 :not 明确豁免：它们的
       25px 下限由后面 min-height:25px !important 专条供给，特异性 (0,4,1)
       低于本条 (0,7,1)，不豁免会被顺手压掉，不靠书写顺序。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_titleCluster"] :is(button, [role="button"]):not([class*="QsffPG_root"] button):not([class*="ZKlsPq_root"] button) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_titleCluster"] :is(button, [role="button"]):not([class*="QsffPG_root"] button):not([class*="ZKlsPq_root"] button) {
     min-width: 0 !important;
     min-height: 0 !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_titleCluster"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_titleCluster"] {
     display: flex !important;
     flex-wrap: nowrap !important;
     flex: 1 1 auto !important;
@@ -1487,7 +1471,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        无实害；findHorizontalScroller 对 overflow-x 容器让位。 */
     overflow-x: auto !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_titleCluster"] > [class*="_crumbs"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_titleCluster"] > [class*="_crumbs"] {
     /* 标题改成自适应：面包屑条吃掉动作区之外的剩余宽度，标题多长就显示多少，
        装不下时由每一段自己的滑动窗口（见下）横向滑。min-width 保底 4 字，
        防止预设名字很长时把标题挤没。 */
@@ -1505,7 +1489,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
   /* 标题本体：自适应宽度 + 横向滑动。宽度由上面面包屑条的剩余空间决定，
      装不下时在本段内左右滑（touch-action: pan-x 让浏览器先认领横滑，
      左缘抽屉手势不会抢走这一笔）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] [class*="_crumbCurrent"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] [class*="_crumbCurrent"] {
     flex: 0 1 auto !important;
     width: auto !important;
     min-width: 0 !important;
@@ -1523,11 +1507,11 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] [class*="_crumbCurrent"]::-webkit-scrollbar {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] [class*="_crumbCurrent"]::-webkit-scrollbar {
     display: none;
   }
   /* 面包屑的父会话段同样是 <button>，不设窗口就会顶出去（子代理会话实测）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] [class*="_crumbSeg"] > button {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] [class*="_crumbSeg"] > button {
     flex: 0 1 auto !important;
     min-width: 0 !important;
     max-width: 100px !important;
@@ -1541,12 +1525,12 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] [class*="_crumbSeg"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_crumbs"] [class*="_crumbSeg"] {
     flex: 0 1 auto !important;
     min-width: 0 !important;
     justify-content: flex-start !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_headerActions"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerActions"] {
     /* 断点 A（用户拍板 2026-09-19，全移动档无条件生效）：动作行不参与收缩，
        chips 按自然宽渲染，收缩职责全数交还 crumbs 滑动窗口当避震器。
        根因链：内容是字体相对的、预算是固定像素的——headless（CJK
@@ -1580,7 +1564,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     overflow-x: auto !important;
     scrollbar-width: none;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_headerActions"]::-webkit-scrollbar {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerActions"]::-webkit-scrollbar {
     display: none;
   }
   /* stats 行左端「N 轮」被裁且不可达（用户真机两帧 + headless 390 复现）：
@@ -1593,10 +1577,10 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      !important 胜宿主 (0,1,0) 普通声明，与书写顺序无关；data-mobile-nav=
      "stats" 是 stats-line 效果打的稳定标记，无哈希、跨宿主代际可用。
      本条置于 ①嵌套块外：裁切陷阱与断点 A 的档位无关，全移动宽度生效。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] [data-mobile-nav="stats"] {
+  [data-mobile-nav="frame"] [data-phase] [data-mobile-nav="stats"] {
     justify-content: flex-start !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [data-mobile-nav="files"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-mobile-nav="files"] {
     width: 36px !important;
     height: 36px !important;
     flex: 0 0 36px !important;
@@ -1612,7 +1596,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      （2026-09-22 实测：corner [332,2 36x36]、图标 343..358 外露，被视口裁切），
      与参考图"右上角只有一个文件夹图标"不一致，也与插件自己的文件按钮重复。
      只针对标题行内的 corner，老一代宿主（corner 是唯一入口）不受影响。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="wSkVaW_titleRow"] > [class*="_headerCorner"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="wSkVaW_titleRow"] > [class*="_headerCorner"] {
     display: none !important;
   }
   /* 右上角换人：0.1.6 把「右侧栏展开按钮」放进了 headerCorner，而插件的
@@ -1620,22 +1604,22 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      藏的是「会话日志胶囊」；新结构里 titleRow 的 :last-child 变成 corner，
      于是右侧栏入口被误藏、面板在手机上打不开。这里把 corner 放出来，
      同时让出「⋯」菜单那一格（360px 一行塞不下两个）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) > :first-child > :last-child[class*="_headerCorner"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) > :first-child > :last-child[class*="_headerCorner"] {
     display: flex !important;
     flex: 0 0 auto !important;
     margin-left: 4px !important;
     margin-right: 0 !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_headerCorner"] button {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerCorner"] button {
     width: 36px !important;
     height: 36px !important;
     min-width: 36px !important;
     min-height: 36px !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_headerUtilities"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerUtilities"] {
     display: none !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [role="tablist"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [role="tablist"] {
     width: 100% !important;
     margin-top: 4px !important;
   }
@@ -1646,10 +1630,10 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      （进子代理会话时最明显）。两块都绝对定位到「对话/轨迹」行右侧，动作行只留
      [预设][文件]；标签行右侧按 chip 宽度预留，标签变多横向滑动也不会钻到下面。
      两个 chip 同时存在时，子代理排在后台任务左边。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) {
     position: relative !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [role="tablist"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [role="tablist"] {
     padding-right: 8px !important;
     /* 宿主的标签行宽度是满宽、默认 content-box，加 padding 会把它顶到
        x=8..368（右缘越过 header 右缘 360 共 8px，header.scrollWidth-clientWidth=8），
@@ -1657,7 +1641,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        预留才是"整整 118px"。 */
     box-sizing: border-box !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]):has([class*="QsffPG_root"]) [role="tablist"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]):has([class*="QsffPG_root"]) [role="tablist"] {
     padding-right: 118px !important;
   }
    /* Agent Team chip（VoX2oq_root，data-team-action）被 rc 代 pin 规则钉死
@@ -1674,7 +1658,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
       最宽的空占位（真机 dpr 4：图标右缘 291 → 文件按钮图标左缘 326，观感 35px
       留白）。28 = 图标 14 + 宿主自带左右内边距 7（.VoX2oq_trigger padding），
       与本插件 toggle/files 同尺寸，不再额外扩拍击区。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [data-team-action][class*="_root"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-team-action][class*="_root"] {
     flex: 0 1 auto !important;
     min-width: 28px !important;
   }
@@ -1686,11 +1670,11 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      pitfalls「header 拥挤」），文件按钮不会被压。位移后两缝 7/7，图标正好居中。
      只在真·手机档生效：768–1023 平板档排布不同，不套这台手机的魔数。 */
   @media (max-width: 767px) and (pointer: coarse) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [data-team-action][class*="_root"] {
+    [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-team-action][class*="_root"] {
       left: 3px !important;
     }
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_headerActions"] [class*="QsffPG_root"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_headerActions"] [class*="QsffPG_root"] {
     position: absolute !important;
     right: 8px !important;
     /* 和子代理 chip 同一套：贴 header 底边 + 下内边距 9px = 与标签文字齐平。 */
@@ -1710,7 +1694,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     max-width: 118px !important;
     flex: 0 0 auto !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="QsffPG_root"] > button {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="QsffPG_root"] > button {
     height: 25px !important;
     min-height: 25px !important;
     padding: 0 2px 9px !important;
@@ -1723,7 +1707,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      宽的面板会被整体推到视口外 —— 点开就像没反应。
      统一改成视口定位：贴在 header 下方、左右各留 8px 满宽展开；顺带脱离
      headerActions 的 overflow 裁剪（绝对定位的面板会被那个 auto 裁掉）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_menu"]:not([class*="_menuAnchor"]) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_menu"]:not([class*="_menuAnchor"]) {
     position: fixed !important;
     left: 8px !important;
     right: 8px !important;
@@ -1742,7 +1726,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      _panel 子串匹配；不会误伤其他弹层 —— data-team-action 根标记只有 agent-team
      插件在用，特异性 (0,5,1) 也高于 _menu 族的 (0,4,1)。代际上整条已由外层
      header:has([class*="_headerLeading"]) 门控，pre-alpha.2 宿主不命中。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [data-team-action] [class*="_panel"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [data-team-action] [class*="_panel"] {
     position: fixed !important;
     left: 8px !important;
     right: 8px !important;
@@ -1765,7 +1749,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
   /* 子代理谱系 chip（ZKlsPq_root）：0.1.6 把它渲染在标题面包屑内部。进子代理
      会话时面包屑变成「父会话 / 当前会话」两段 + 这个 chip，动作行就叠在一起，
      所以整块搬到「对话/轨迹」这一行的空白区里居中，并与标签文字纵向对齐。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"] {
     position: absolute !important;
     /* 在「标签右侧的空白区」里居中（左边界让开对话/轨迹，约 104px），
        比整行居中往右一些。 */
@@ -1791,10 +1775,10 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      实测 84.6..264 盖住轨迹/记忆两 tab；headless 中任务已结束但
      QsffPG_root 仍在 DOM，:has 命中幽灵元素）；聚合态不受影响，让位语义
      原样保留。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]):has([class*="QsffPG_root"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]):has([class*="QsffPG_root"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]) {
     right: 126px !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"] > button {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"] > button {
     height: 25px !important;
     min-height: 25px !important;
     line-height: 16px !important;
@@ -1810,14 +1794,14 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      两个变体并列，兼容「tab 是 tablist 直接子按钮」与「tab 被容器包裹」两种渲染；
      两条变体均 (0,5,2)（带 QsffPG 的二次覆盖规则为 (0,6,2)），高于上面两条既有规则，
      不依赖书写顺序。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]):has([role="tablist"] button:nth-of-type(3)) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]),
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]):has([role="tablist"] > button:nth-child(3)) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]):has([role="tablist"] button:nth-of-type(3)) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]),
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]):has([role="tablist"] > button:nth-child(3)) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]) {
     left: auto !important;
     right: 8px !important;
     margin: 0 !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]):has([role="tablist"] button:nth-of-type(3)):has([class*="QsffPG_root"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]),
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]):has([role="tablist"] > button:nth-child(3)):has([class*="QsffPG_root"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]):has([role="tablist"] button:nth-of-type(3)):has([class*="QsffPG_root"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]),
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]):has([role="tablist"] > button:nth-child(3)):has([class*="QsffPG_root"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]) {
     right: 126px !important;
   }
   /* 真机反馈：「标题下面多了一条灰色滑条」。第 4/5 条为了让长标题能左右拖着看，
@@ -1829,13 +1813,13 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      offsetHeight − clientHeight = 8）。所以这里对整个会话头部统一掐掉滚动条：
      滑动能力保留，视觉上不再多一条。头部里任何位置的滚动条在 360px 宽的手机上
      都不是想要的，故不再按具体类名收窄范围。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]),
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) * {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]),
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) * {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"])::-webkit-scrollbar,
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) *::-webkit-scrollbar {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"])::-webkit-scrollbar,
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) *::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
@@ -1856,11 +1840,11 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      不受损。特异性与上面 ZKlsPq_root 规则同类同权 (0,4,1)，靠书写在后接管
      switcher 变体；h8S2Va 旧代是否有同名修饰类未取证，a2 (ZKlsPq_) 已实测
      对号。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_switcherRoot"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_switcherRoot"] {
     max-width: min(46vw, 180px) !important;
     overflow: hidden !important;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="_switcherRoot"] > button {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_switcherRoot"] > button {
     max-width: 100% !important;
     min-width: 0 !important;
   }
@@ -1877,7 +1861,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      与 QsffPG 同场时本条让位取消后二者同靠右——QsffPG 真在场时由
      findHorizontalScroller/后续实测定去留（数值 48/8/180 均可调）。菜单
      position:fixed 独立定位层，不受本条影响（取证已证）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"][class*="_switcherRoot"] {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"][class*="_switcherRoot"] {
     left: auto !important;
     right: 8px !important;
     top: 48px !important;
@@ -1894,7 +1878,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      tab/QsffPG 重叠，属无害惰性，彻底解（JS 可见性标记）留 effects
      车道。聚合 max-width min(32vw,116) 沿用基础规则不动；数值 48/8 可
      调。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]) {
     left: auto !important;
     right: 8px !important;
     top: 48px !important;
@@ -1912,8 +1896,8 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        …[class*=ZKlsPq_root]（只有 (0,4,1)）⇒ 特异性输给那条 48px，
        店主实测"又没对齐了"（聚合芯片文字回到 49..63）。带上 :not(...) 才并列、
        再靠"后到先得"取胜。 */
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]),
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"][class*="_switcherRoot"] {
+    [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"]:not([class*="_switcherRoot"]),
+    [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"][class*="_switcherRoot"] {
       top: 42px !important;
     }
   }
@@ -1925,7 +1909,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
       同为 (0,4,1) !important 且书写在后，同特异性后到先得把 separator
       顶回 display:block（实测 390px separator [269.1,·,5.5,25] 实绘可见）。
       加 :not 把 separator 从本条管辖范围摘掉，隐藏权交还 rc 代那条。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"] span:not([class*="_separator"]) {
+  [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="ZKlsPq_root"] span:not([class*="_separator"]) {
     display: block !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -1955,7 +1939,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      另加代际门；必须带哈希前缀，裸 [class*=_triggerLabel] 会误伤
      permission-presets / settings-general 的同名片段。 */
   @media (max-width: 767px) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] [class*="_card"]:has(textarea, [data-composer-input]) [class*="_row"]:has([class*="_trailing"]) {
+    [data-mobile-nav="frame"] [data-phase] [class*="_card"]:has(textarea, [data-composer-input]) [class*="_row"]:has([class*="_trailing"]) {
       --dsh-composer-model-text-display: none;
       --dsh-composer-model-icon-display: block;
     }
@@ -1965,14 +1949,14 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
        （实测墨迹间距 10px → ~4px，匣宽 46 → ~32px）。issue #101 对账：原与
        max-width 同块、无档位限定，768–1023 平板档文字在场时也被归零，chip
        内部「图标|模型名|effort|⌄」贴死 —— 2026-09-24 挪进本 ≤767 专档。 */
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] [class*="_7KE1Ra_trigger"] {
+    [data-mobile-nav="frame"] [data-phase] [class*="_7KE1Ra_trigger"] {
       padding: 0 !important;
       gap: 0 !important;
     }
     /* ⌄ 的 svg 自身带内边距（墨迹比 viewBox 窄），再拉近 2px。gap 归零后两个
        svg 的内边距会让墨迹直接贴住（实测墨迹连成一段），这里不再加负 margin，
        留 ~2px 呼吸 —— 间距从 10px 收到 2px。 */
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] [class*="_7KE1Ra_chevron"] {
+    [data-mobile-nav="frame"] [data-phase] [class*="_7KE1Ra_chevron"] {
       margin-left: 0 !important;
     }
   }
@@ -1982,7 +1966,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      （headless 字体窄恰好放得下，同一盲区）。放宽到 60cqw，effort 有宿主
      自带 flex-shrink:1000 先让位。手机档文字已隐藏，这条不参与。特异性
      (0,3,0)+!important 胜宿主 (0,1,0) 普通声明；60 数值可调。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] [class*="_7KE1Ra_trigger"] {
+  [data-mobile-nav="frame"] [data-phase] [class*="_7KE1Ra_trigger"] {
     max-width: min(360px, 60cqw) !important;
     /* issue #101 对账：padding/gap 归零与 chevron margin-left:0 已分档至上方
        ≤767 专档（那是「图标化后」的前提）；768–1023 文字显示档保留宿主
@@ -2093,7 +2077,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      2026-09-25, rc.2 portal regression: 0.1.7-rc.1 rendered this sheet in
      place (inside the app frame); rc.2 wraps it in
      createPortal(..., document.body) — diffed rc.1 vs rc.2 bundles, no
-     createPortal before — so every :is([data-mobile-nav="frame"], [class*="_frame"])-scoped
+     createPortal before — so every [data-mobile-nav="frame"]-scoped
      dialog rule (the frame-era single-row scroller in compat.css among
      them) went dead the moment the overlay became a direct body child.
      What survived was this rule's own flex-wrap:wrap, which had been
@@ -2296,14 +2280,14 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      32px 会过量）。在 390px 上它算出来正好还是 32px，与上一版行为一致。
      锚点全部是宿主 data-* 标记，比 css-module 哈希类（X_2TxG_）稳定；
      pre-alpha.2 宿主没有这些标记，规则天然不命中（代际门控）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) section[data-plugin-panel] {
+  [data-mobile-nav="frame"] section[data-plugin-panel] {
     --dsh-web-mobile-panel-clearance: calc(56px - clamp(24px, 4vw, 48px));
   }
   /* 页首是宿主滚动盒的直接子元素，宿主给它 width:100%（.X_2TxG_page>*）。
      这种盒子上用 margin 会把整行顶出右缘、给面板加出一条横向滚动条，所以
      这里用 margin + 等量收窄：margin 盒仍是 100%，左缘让开 FAB，右缘不动
      （工具栏「添加插件」保持贴右）。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) section[data-plugin-panel] [class*="_pageHead"] {
+  [data-mobile-nav="frame"] section[data-plugin-panel] [class*="_pageHead"] {
     margin-left: var(--dsh-web-mobile-panel-clearance) !important;
     width: calc(100% - var(--dsh-web-mobile-panel-clearance)) !important;
   }
@@ -2321,12 +2305,12 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      本子树里也没有别的 crumb 家族（文件面板 ZuhsRW_crumb* 在另一棵树）。
      实测让位后 crumb 变 [56,28,310,14] —— flex 拉伸项自己收窄 32px，无横向
      溢出（面板 scrollWidth 恒 390），点文字可正常返回列表。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) section[data-plugin-panel] [data-plugin-detail] > button:first-child,
-  :is([data-mobile-nav="frame"], [class*="_frame"]) section[data-plugin-panel] [data-plugin-item-detail] > button:first-child,
-  :is([data-mobile-nav="frame"], [class*="_frame"]) section[data-plugin-panel] [data-plugin-row-detail] > button:first-child,
-  :is([data-mobile-nav="frame"], [class*="_frame"]) section[data-plugin-panel] [data-plugin-detail] button[class*="_crumb"],
-  :is([data-mobile-nav="frame"], [class*="_frame"]) section[data-plugin-panel] [data-plugin-item-detail] button[class*="_crumb"],
-  :is([data-mobile-nav="frame"], [class*="_frame"]) section[data-plugin-panel] [data-plugin-row-detail] button[class*="_crumb"] {
+  [data-mobile-nav="frame"] section[data-plugin-panel] [data-plugin-detail] > button:first-child,
+  [data-mobile-nav="frame"] section[data-plugin-panel] [data-plugin-item-detail] > button:first-child,
+  [data-mobile-nav="frame"] section[data-plugin-panel] [data-plugin-row-detail] > button:first-child,
+  [data-mobile-nav="frame"] section[data-plugin-panel] [data-plugin-detail] button[class*="_crumb"],
+  [data-mobile-nav="frame"] section[data-plugin-panel] [data-plugin-item-detail] button[class*="_crumb"],
+  [data-mobile-nav="frame"] section[data-plugin-panel] [data-plugin-row-detail] button[class*="_crumb"] {
     margin-left: var(--dsh-web-mobile-panel-clearance) !important;
   }
   /* 快捷键弹层在手机上的落地形态。上面那条 :not([data-shortcut-modal="shortcuts"])
@@ -2414,18 +2398,18 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
   @keyframes dsh-web-mobile-panel-reveal {
     from { opacity: 0; }
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]):has([class*="panelRow"][aria-current="page"]) [class*="_centerCol"] > * > * {
+  [data-mobile-nav="frame"]:has([class*="panelRow"][aria-current="page"]) [class*="_centerCol"] > * > * {
     animation: dsh-web-mobile-panel-in .15s var(--ds-ease-in-out, ease-in-out) backwards;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"])[data-mobile-panel-exit]:not(:has([class*="panelRow"][aria-current="page"])) [class*="_centerCol"] > * > * {
+  [data-mobile-nav="frame"][data-mobile-panel-exit]:not(:has([class*="panelRow"][aria-current="page"])) [class*="_centerCol"] > * > * {
     /* ease-out rather than the shared in-out curve: the panel vanishes and the
        conversation appears on the same frame, so the fade has to come up fast
        or the first frames read as a flash of empty background. */
     animation: dsh-web-mobile-panel-reveal .15s cubic-bezier(0, 0, .2, 1) backwards;
   }
   @media (prefers-reduced-motion: reduce) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]):has([class*="panelRow"][aria-current="page"]) [class*="_centerCol"] > * > *,
-    :is([data-mobile-nav="frame"], [class*="_frame"])[data-mobile-panel-exit]:not(:has([class*="panelRow"][aria-current="page"])) [class*="_centerCol"] > * > * {
+    [data-mobile-nav="frame"]:has([class*="panelRow"][aria-current="page"]) [class*="_centerCol"] > * > *,
+    [data-mobile-nav="frame"][data-mobile-panel-exit]:not(:has([class*="panelRow"][aria-current="page"])) [class*="_centerCol"] > * > * {
       animation: none !important;
     }
   }
@@ -2440,7 +2424,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
         只在「真·手机」档（CSS 宽 ≤ 767px，对齐上游 768px 平板档边界）生效；
         768–1023 保留上游手机 UI 的排布，不套这台手机的魔数。
      非 DSHA 宿主上没有这些标记，整块天然不命中（死规则）。 ---------- */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header .dsha-preset-header-anchor {
+  [data-mobile-nav="frame"] [data-phase] header .dsha-preset-header-anchor {
     order: 1;
     width: max-content;
     flex: 0 1 auto;
@@ -2448,7 +2432,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     max-width: min(40vw, 130px);
     margin-left: auto;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] {
+  [data-mobile-nav="frame"] [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] {
     display: inline-flex !important;
     align-items: center;
     gap: 4px;
@@ -2464,12 +2448,12 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     font: inherit;
     font-size: 12px;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > svg {
+  [data-mobile-nav="frame"] [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > svg {
     position: static !important;
     transform: none !important;
     flex: 0 0 auto;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > span {
+  [data-mobile-nav="frame"] [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > span {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2484,20 +2468,20 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
         **完全不碰子代理芯片**，改这边不会把那边压掉。
      svg:last-of-type 取 chip 里最后一个 svg（下拉箭头）；只有一个 svg 时同样命中。
      时长 .12s 与子代理 chip 自带的 transition 一致，两个 v 观感统一。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > svg:last-of-type {
+  [data-mobile-nav="frame"] [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > svg:last-of-type {
     transition: transform .12s;
   }
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"][aria-expanded="true"] > svg:last-of-type {
+  [data-mobile-nav="frame"] [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"][aria-expanded="true"] > svg:last-of-type {
     transform: rotate(180deg) !important;
   }
   @media (prefers-reduced-motion: reduce) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > svg:last-of-type {
+    [data-mobile-nav="frame"] [data-phase] header .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > svg:last-of-type {
       transition: none !important;
     }
   }
   /* ② 真·手机档（CSS 宽 ≤ 767px）才生效的调优值。 */
   @media (max-width: 767px) and (pointer: coarse) {
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header .dsha-preset-header-anchor {
+    [data-mobile-nav="frame"] [data-phase] header .dsha-preset-header-anchor {
       /* 宿主 cubgiG_menuAnchor 带 left:-8px（原本是给弹层对位用的），
          手机上和标题窗口右缘叠 2px；这里把它拉回 0，整体右移 8px。 */
       left: 0 !important;
@@ -2505,7 +2489,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     /* 智能体团队 Web 开启后头部多一个 Agent Team chip；预设名超过 4 个字就会
        把它挤掉（实测 6 个字时 Agent Team 被裁成「Agent Te」并压住文件按钮）。
        此时把预设名收成 4 个字 + 省略号 —— 完整名字在预设菜单里点开即达。 */
-    :is([data-mobile-nav="frame"], [class*="_frame"]) [data-phase] header:has([data-team-action]) .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > span {
+    [data-mobile-nav="frame"] [data-phase] header:has([data-team-action]) .dsha-preset-header-anchor [data-dsha-agent-preset="header"] > span {
       max-width: 4em;
     }
   }
@@ -2516,7 +2500,7 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      删除 / 归档 / 分叉 继续有触屏入口。行内布局不动：标题是 flex:1 +
      min-width:0，自己让位并省略；host 的 time / pinIndicator 保持原样。
      只作用于抽屉里的会话行，搜索行（searchResultRow）不受影响。 */
-  :is([data-mobile-nav="frame"], [class*="_frame"]) [class*="sessionRow"] [class*="_rowActions"] {
+  [data-mobile-nav="frame"] [class*="sessionRow"] [class*="_rowActions"] {
     display: inline-flex !important;
   }
 }
