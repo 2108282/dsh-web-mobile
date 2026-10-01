@@ -855,7 +855,15 @@ export function installOverlayInteractions(ctx: ClientContext): void {
       // A touch row-tap owns the close (pointerup or the navigation observer);
       // let the row's click reach React without toggling the drawer twice.
       if (performance.now() - lastTouchNavAt < 500) return
-      if (shouldCloseOnTapInsideDrawer(target)) toggleSidebar()
+      if (shouldCloseOnTapInsideDrawer(target)) {
+        toggleSidebar()
+      } else if (
+        target instanceof Element &&
+        target.closest('button[aria-haspopup="dialog"], [class*="VOzbGW_trigger"]') !== null
+      ) {
+        // Tapping the settings trigger inside the drawer: close drawer so settings sheet gets full screen
+        if (drawerOpen()) toggleSidebar()
+      }
     }
 
     const onDrawerPointerUp = (event: PointerEvent): void => {

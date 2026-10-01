@@ -2011,30 +2011,23 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      "shortcuts" on this one — gating on that attribute (not on a hashed
      class) keeps the official centered card, the same treatment the
      export dialog gets. */
+  [data-shortcut-modal="settings"],
+  [role="dialog"][data-shortcut-modal="settings"],
   [aria-modal="true"]:has(> :first-child > :last-child > button):not(:has([role="navigation"])):not(:has([class*="ZuhsRW"])):not([data-shortcut-modal="shortcuts"]) {
-    position: absolute !important;
+    position: fixed !important;
     left: 8px !important;
-    /* Fixed top (no translateY): a transform on the panel combined with the
-       panel overflowing the max-content drawer shifts the fixed overlay's
-       coordinate frame, dragging the whole sidebar content off-screen. The
-       safe-area inset keeps the sheet below the status bar / notch. */
-    top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
-    width: calc(100vw - 16px);
-    max-width: calc(100vw - 16px);
-    /* Height follows the content (no dead space under a short page); it
-       caps at the KEYBOARD-LESS viewport height minus 24 (less the safe-area
-       top) and the options area scrolls only then. STABLE_VIEWPORT_VAR, not
-       100dvh: measured 2026-09-25 on Android 16 WebView (adjustResize), the
-       soft keyboard takes the layout viewport 754 -> 471 and vh / svh / lvh /
-       dvh all follow it, so a dvh-sized sheet collapses a step the moment the
-       shortcut modal's search field raises the keyboard — the reporter's
-       「又闪一下」. The variable never moves for the keyboard, so the sheet
-       keeps its size and the keyboard covers its lower half instead. */
+    right: 8px !important;
+    margin: 0 auto !important;
+    /* Fixed top with safe-area inset: keep the sheet pinned firmly to the top of visual viewport,
+       never drifting downward due to parent container scrolling or transforms. */
+    top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    z-index: 1400 !important;
+    /* Height follows the content; caps at stable viewport height */
     height: auto;
     max-height: min(800px, calc(100vh - 24px - env(safe-area-inset-top, 0px)));
     max-height: min(800px, calc(var(--dsh-web-mobile-vh, 100dvh) - 24px - env(safe-area-inset-top, 0px)));
-    /* Only a real viewport change (rotation / window resize) reaches this now,
-       so the short transition reads as a slide instead of a jump. */
     transition: max-height .2s var(--ds-ease-out, ease-in-out);
     flex-direction: column !important;
     border-radius: 14px !important;
@@ -2224,18 +2217,17 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     border-radius: 50%;
   }
   /* The config-file action (a settings.action slot — dsh-version-update's
-     "打开配置文件") is hidden on phones: it is rarely needed here, and its
-     ~94px next to the 32px close made the pinned toolbar 138px wide —
-     wide enough to swallow the nav strip's first cells while the strip
-     still wrapped (2026-09-25 report, the other half of the same
-     regression as the scroller fix above). The close ✕ is the toolbar's
-     SIBLING, not its child (verified in the live DOM: header children are
-     [actions, close]), so hiding the actions never removes the way out.
-     Desktop keeps the button: this whole block sits inside the mobile
-     media wrapper. (Portal-aware replacement for the frame-scoped rule in
-     compat.css, which died with the rc.2 portal move.) */
+     "打开配置文件") is completely hidden and disabled on phones: it is rarely
+     needed here, and tapping or gesturing near it would accidentally invoke
+     external Android file viewers to open cordis.patch.yml. */
+  [data-shortcut-modal="settings"] [class*="_actions"],
+  [aria-modal="true"] [class*="_header"]:not([class*="_headerActions"]) [class*="_actions"],
   [aria-modal="true"]:has(> :first-child > :last-child > button):not(:has([role="navigation"])):not(:has([class*="ZuhsRW"])):not([data-shortcut-modal="shortcuts"]) > :last-child > [class*="_header"]:not([class*="_headerActions"]) [class*="_actions"] {
     display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
   }
   /* Appearance mode cards: the official cube row renders three tall
      vertical cards (~268px) that eat half the sheet. Turn them into a

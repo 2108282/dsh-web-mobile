@@ -1349,6 +1349,23 @@ function endStroke(
     markStrokeConsumed(event.target)
     cooldownUntil = performance.now() + COOLDOWN_MS
   }
+  if (modal && Math.abs(dx) > 20) {
+    // Gesturing on a modal: consume synthetic click so release never clicks buttons underneath or in header
+    markStrokeConsumed(event.target)
+    // If user performed a rightward back swipe (dx > 40), treat it as closing the modal
+    if (dx > 40) {
+      const modalEl = document.querySelector('[aria-modal="true"]')
+      const closeBtn = modalEl?.querySelector<HTMLElement>(
+        'button[aria-label*="close" i], button[aria-label*="关闭" i], [class*="_closeButton"]'
+      )
+      if (closeBtn) {
+        closeBtn.click()
+      } else {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+      }
+    }
+    return
+  }
   if (filesMode && verdict === 'none') {
     // A 'none' files release is still a gesture (panel open + leftward, or
     // too short): consume its synthetic click so it cannot flip the panel
