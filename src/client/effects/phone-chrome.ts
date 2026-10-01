@@ -158,17 +158,47 @@ export function installFrameController(): () => void {
   if (frameControllerInstalled) return () => {}
   frameControllerInstalled = true
   let frame: HTMLElement | null = null
-  const removeTask = addReconcilerTask({
-    name: 'frame-marker',
-    scopes: ['*'],
-    ensure: () => {
-      frame = findFrame()
-      if (frame !== null && !frame.hasAttribute('data-mobile-nav')) {
+
+  const markFrame = (): boolean => {
+    frame = findFrame()
+    if (frame !== null) {
+      if (!frame.hasAttribute('data-mobile-nav')) {
         frame.setAttribute('data-mobile-nav', 'frame')
       }
       ensureDismissShadow()
+      return true
+    }
+    return false
+  }
+
+  // Check immediately
+  markFrame()
+
+  // Only watch direct children of body/root (subtree: false) to catch when AppFrame mounts,
+  // without listening to deep conversation mutations during streaming.
+  let mountObserver: MutationObserver | null = null
+  if (typeof document !== 'undefined' && document.body) {
+    mountObserver = new MutationObserver(() => {
+      if (markFrame() && mountObserver !== null) {
+        // Once frame is found and marked, stop watching direct child mounts
+        mountObserver.disconnect()
+        mountObserver = null
+      }
+    })
+    mountObserver.observe(document.body, { childList: true, subtree: false })
+  }
+
+  const removeTask = addReconcilerTask({
+    name: 'frame-marker',
+    scopes: ['*', 'data-sidebar-collapsed'],
+    ensure: () => {
+      markFrame()
     },
     dispose: () => {
+      if (mountObserver !== null) {
+        mountObserver.disconnect()
+        mountObserver = null
+      }
       if (frame !== null) {
         frame.removeAttribute('data-mobile-nav')
         frame.removeAttribute('data-mobile-preview-full')
@@ -182,6 +212,10 @@ export function installFrameController(): () => void {
     },
   })
   return () => {
+    if (mountObserver !== null) {
+      mountObserver.disconnect()
+      mountObserver = null
+    }
     removeTask()
     frameControllerInstalled = false
   }
@@ -236,16 +270,30 @@ export function installReconciler(ctx: ClientContext): () => void {
       }
       if (keys.size > 0) core.note(keys)
     })
-    const frame = getFrame()
-    if (frame !== null) {
-      observer.observe(frame, {
+    const attachFrame = (): void => {
+      const f = getFrame()
+      if (f !== null) {
+        observer.observe(f, {
+          attributes: true,
+          attributeFilter: [
+            'data-phase',
+            'data-sidebar-collapsed',
+            'data-aionui-explorer-open',
+            'data-aionui-preview-open',
+            'data-mobile-preview-full',
+          ],
+        })
+      }
+    }
+    attachFrame()
+    if (document.body) {
+      observer.observe(document.body, {
         attributes: true,
+        childList: true,
+        subtree: false,
         attributeFilter: [
           'data-phase',
-          'data-sidebar-collapsed',
-          'data-aionui-explorer-open',
-          'data-aionui-preview-open',
-          'data-mobile-preview-full',
+          'data-ds-dark-theme',
         ],
       })
     }
