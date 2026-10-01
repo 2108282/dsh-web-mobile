@@ -3,6 +3,7 @@ import { consumeIfGestured, isStrokeLocked } from './gesture-guard.ts'
 import { findSessionIdInFiber, isTapWithinSlop, reactFiberOf } from './session-row-fiber.ts'
 import { createReconcilerCore } from '../core/reconciler-core.ts'
 import type { ReconcilerTask } from '../core/reconciler-core.ts'
+import { createStatsLineTask } from './stats-line.ts'
 import { currentSessionIdOf, sessionsCanOpen } from '../core/sessions-compat.ts'
 import { createPreviewCloseTask, createSheetRiseTask } from './aionui-compat.ts'
 import { createPreviewFullscreenTask } from './preview-fullscreen.ts'
@@ -1061,6 +1062,11 @@ export function registerReconcileTasks(ctx: ClientContext, panelExit: PanelExit)
     addReconcilerTask(createPreviewFullscreenTask(t)),
     addReconcilerTask(createPreviewCloseTask()),
     addReconcilerTask(createSheetRiseTask()),
+    // stats-line: mark the official turns/steps/usage row so the CSS lays it
+    // out as ONE full-width line, and overlay the context ring into the
+    // composer row's right cluster. Without it the ring drops to its own row
+    // under the pills and the composer bottom reads as two stacked rows.
+    addReconcilerTask(createStatsLineTask()),
     addReconcilerTask(createOverlayTask(t, () => toggleDrawer(ctx), panelExit)),
     addReconcilerTask(panelExit.task),
     addReconcilerTask(createFileViewerMarkerTask()),

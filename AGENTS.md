@@ -23,14 +23,15 @@
   │     ├─ debug.ts          ← ?mobile-nav-debug=1 诊断徽章
   │     ├─ components/       ← MobileNavToggle / MobileDrawerFooter / ComposerFileButton / open-files-panel.ts
   │     ├─ core/             ← reconciler-core.ts（零 import）+ raf-scheduler.ts · css-rules.ts · sessions-compat.ts · layout-compat.ts · icon-compat.ts（宿主图标跨代命名兼容）
-  │     ├─ effects/          ← 17 个效果模块：phone-chrome · sidebar-swipe ·
+  │     ├─ effects/          ← 18 个效果模块：phone-chrome · sidebar-swipe ·
   │     │                       gesture-guard · subagent-chip-touch · composer-keyboard-guard ·
   │     │                       shortcut-modal-keyboard-guard ·
   │     │                       composer-plus-toggle · workspace-chip-toggle · team-chip-toggle ·
   │     │                       model-menu-anchor ·
   │     │                       file-viewer-compat · aionui-compat ·
   │     │                       preview-fullscreen ·
-  │     │                       overlay-backdrop-fab · panel-exit · session-menu · session-row-fiber
+  │     │                       overlay-backdrop-fab · panel-exit · session-menu · session-row-fiber ·
+  │     │                       stats-line（标记宿主统计条为一整行，上下文环叠到输入框右簇，否则底部呈两排）
   │     ├─ styles/           ← index.ts（base→layout→compat→misc 承载顺序）+ 4 个 .css.ts
   │     └─ i18n/locales.ts
   ├─ lib/                    ← 生成物：随 pnpm build 刷新，勿手改
