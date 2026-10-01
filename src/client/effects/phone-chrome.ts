@@ -964,7 +964,10 @@ export function installOverlayInteractions(ctx: ClientContext): void {
       }
     }
 
-    // Modal（设置面板等）专用的侧滑返回与 Android 系统返回键治理
+    // Modal（设置面板等）专用的 Android 系统全面屏手势返回治理
+    const isSettingsModalOpen = (): boolean =>
+      document.querySelector('[data-shortcut-modal="settings"], [aria-modal="true"], [role="dialog"]') !== null
+
     const closeCurrentModal = (): boolean => {
       const modal = document.querySelector('[data-shortcut-modal="settings"], [aria-modal="true"], [role="dialog"]')
       if (modal === null) return false
@@ -975,75 +978,73 @@ export function installOverlayInteractions(ctx: ClientContext): void {
         closeBtn.click()
         return true
       }
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true, cancelable: true }))
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true, cancelable: true }))
       return true
     }
 
-    // 1. Android 全面屏手势返回（系统返回键 / 浏览器 history popstate）
     let modalHistoryArmed = false
-    const onModalPopState = (): void => {
-      if (modalHistoryArmed) {
-        modalHistoryArmed = false
-        closeCurrentModal()
+    let selfBackPending = false
+    let selfBackTimer: number | null = null
+
+    const clearSelfBack = (): void => {
+      selfBackPending = false
+      if (selfBackTimer !== null) {
+        window.clearTimeout(selfBackTimer)
+        selfBackTimer = null
       }
+    }
+
+    const selfBack = (): void => {
+      selfBackPending = true
+      if (selfBackTimer !== null) window.clearTimeout(selfBackTimer)
+      selfBackTimer = window.setTimeout(clearSelfBack, 1200)
+      try {
+        history.back()
+      } catch {
+        clearSelfBack()
+      }
+    }
+
+    const onModalPopState = (): void => {
+      if (selfBackPending) {
+        clearSelfBack()
+        return
+      }
+      if (!modalHistoryArmed) return
+      modalHistoryArmed = false
+      // 用户触发了 Android 系统级边缘侧滑返回手势，消费该状态并关闭设置弹窗
+      closeCurrentModal()
     }
     window.addEventListener('popstate', onModalPopState)
 
-    // 2. 网页内侧滑返回手势（触控边缘向内滑）
-    let modalTouchStartX = 0
-    let modalTouchStartY = 0
-    let modalTracking = false
-
-    const onModalTouchStart = (e: TouchEvent): void => {
-      if (e.touches.length !== 1) return
-      const modal = document.querySelector('[data-shortcut-modal="settings"], [aria-modal="true"]')
-      if (modal === null) {
-        modalTracking = false
-        return
-      }
-      // 首次检测到 Modal 挂载且未压入 history，压入一条记录供 Android 系统返回手势使用
-      if (!modalHistoryArmed) {
+    // 只要设置弹窗挂载就立即压入虚拟 history，弹窗关闭时若用户点 ✕ 则主动退栈
+    const syncModalHistory = (): void => {
+      const open = isSettingsModalOpen()
+      if (open) {
+        if (modalHistoryArmed) return
         modalHistoryArmed = true
         try {
-          history.pushState({ dshModalBack: true }, '')
+          history.pushState({ mobileSettingsModal: true }, '')
         } catch {
           modalHistoryArmed = false
         }
-      }
-      const touch = e.touches[0]
-      if (touch === undefined) return
-      modalTouchStartX = touch.clientX
-      modalTouchStartY = touch.clientY
-      modalTracking = true
-    }
-
-    const onModalTouchEnd = (e: TouchEvent): void => {
-      if (!modalTracking) return
-      modalTracking = false
-      const modal = document.querySelector('[data-shortcut-modal="settings"], [aria-modal="true"]')
-      if (modal === null) return
-      const touch = e.changedTouches[0]
-      if (touch === undefined) return
-      const dx = touch.clientX - modalTouchStartX
-      const dy = touch.clientY - modalTouchStartY
-
-      // 判定侧滑返回手势：
-      // - 左边缘右滑（典型的右滑返回）：startX < 120 且 dx > 35 且水平为主
-      // - 右边缘左滑（很多手机右侧侧滑也代表返回）：startX > window.innerWidth - 120 且 dx < -35 且水平为主
-      // - 任意位置明显右滑返回：dx > 55 且 Math.abs(dx) > Math.abs(dy) * 1.3
-      const isLeftSwipeBack = modalTouchStartX < 140 && dx > 35 && Math.abs(dx) > Math.abs(dy)
-      const isRightSwipeBack = modalTouchStartX > window.innerWidth - 140 && dx < -35 && Math.abs(dx) > Math.abs(dy)
-      const isGeneralSwipeBack = dx > 60 && Math.abs(dx) > Math.abs(dy) * 1.3
-
-      if (isLeftSwipeBack || isRightSwipeBack || isGeneralSwipeBack) {
-        e.preventDefault()
-        e.stopPropagation()
-        closeCurrentModal()
+      } else if (modalHistoryArmed) {
+        modalHistoryArmed = false
+        selfBack()
       }
     }
 
-    document.addEventListener('touchstart', onModalTouchStart, { capture: true, passive: true })
-    document.addEventListener('touchend', onModalTouchEnd, { capture: true, passive: false })
+    // 初始立即检查一次
+    syncModalHistory()
+
+    // 仅监听 document.body 直接子节点变化（subtree: false，对流式吐字 0 唤起、0 损耗）
+    let modalObserver: MutationObserver | null = null
+    if (typeof document !== 'undefined' && document.body) {
+      modalObserver = new MutationObserver(() => {
+        syncModalHistory()
+      })
+      modalObserver.observe(document.body, { childList: true, subtree: false })
+    }
 
     document.addEventListener('dsha-session-open', onDshaSessionOpen)
     document.addEventListener('dblclick', onDrawerDoubleClick, true)
@@ -1060,10 +1061,17 @@ export function installOverlayInteractions(ctx: ClientContext): void {
       disarmCloseOnNav()
       touchDownAt = null
       clearPress()
+      clearSelfBack()
+      if (modalObserver !== null) {
+        modalObserver.disconnect()
+        modalObserver = null
+      }
+      if (modalHistoryArmed) {
+        modalHistoryArmed = false
+        selfBack()
+      }
       document.removeEventListener('dsha-session-open', onDshaSessionOpen)
       window.removeEventListener('popstate', onModalPopState)
-      document.removeEventListener('touchstart', onModalTouchStart, true)
-      document.removeEventListener('touchend', onModalTouchEnd, true)
       document.removeEventListener('dblclick', onDrawerDoubleClick, true)
       document.removeEventListener('keydown', onKeyDown, true)
       document.removeEventListener('click', onDrawerClick, true)
