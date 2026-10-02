@@ -97,7 +97,9 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      position/inset/width on the element, the column kept a correct-looking box
      while neither painting nor hit-testing, which is the "all black, click
      anywhere closes" root cause. The backdrop we append carries the dimming. */
-  [data-mobile-nav="frame"] > :first-child {
+  [data-mobile-nav="frame"] > :first-child,
+  html:has([data-mobile-nav]) [class*="frame"] > [class*="sidebarCol"],
+  html:has([data-mobile-nav]) [class*="frame"] > :first-child {
     position: absolute !important;
     inset: 0 auto 0 0 !important;
     /* !important is load-bearing: the host ships
@@ -938,15 +940,13 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      re-hide needs no !important: the grid rule's display is a normal
      declaration and our style tag loads last. The header carries no children in
      hero (drawer entry is the FAB), so hiding it frees the dead 85px too. */
-  [data-mobile-nav="frame"] [data-phase] header[class*="_headerHidden"] {
-    display: none;
-  }
-  /* 0.1.6-alpha.2 renamed the hero-empty marker: headerHidden -> headerBlank
-     (audit §1 row 3), so the rule above is a dead needle on alpha.2 and this
-     one is dead on rc hosts — together they cover both generations. Same
-     (0,3,1) shape, same no-!important reasoning as above. */
-  [data-mobile-nav="frame"] [data-phase] header[class*="headerBlank"] {
-    display: none;
+  [data-mobile-nav="frame"] [data-phase] header[class*="_headerHidden"],
+  html:has([data-mobile-nav]) header[class*="_headerHidden"],
+  [data-mobile-nav="frame"] header[class*="_headerHidden"],
+  [data-mobile-nav="frame"] [data-phase] header[class*="headerBlank"],
+  html:has([data-mobile-nav]) header[class*="headerBlank"],
+  [data-mobile-nav="frame"] header[class*="headerBlank"] {
+    display: none !important;
   }
   /* Header popovers resolve against the header, not against their 28px flow
      box. 0.1.5's background-job chip anchors its menu with

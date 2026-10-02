@@ -97,7 +97,11 @@ export function installMobileEffect(
 
 /** The AppFrame element: direct parent of the shell overlay layer. */
 export function findFrame(): HTMLElement | null {
-  return document.querySelector('[data-shell-overlay]')?.parentElement ?? null
+  const overlay = document.querySelector('[data-shell-overlay]')
+  if (overlay?.parentElement) return overlay.parentElement
+  return document.querySelector<HTMLElement>(
+    '[data-mobile-nav="frame"], [class*="pI_x6G_frame"], [class*="frame"]:has(> [class*="sidebarCol"])'
+  )
 }
 
 /** Resolve the plugin-owned frame marker, falling back to the raw shell frame. */
@@ -144,6 +148,8 @@ export function ensureDismissShadow(): void {
   pane.insertBefore(element, pane.firstElementChild)
 }
 
+let onFrameMountedCallback: ((frame: HTMLElement) => void) | null = null
+
 /**
  * Frame marker controller: owns `data-mobile-nav="frame"` and every plugin
  * marker that can survive on the shell-owned frame. Installed once at apply
@@ -159,6 +165,8 @@ export function installFrameController(): () => void {
   if (frameControllerInstalled) return () => {}
   frameControllerInstalled = true
   let frame: HTMLElement | null = null
+  let mountObserver: MutationObserver | null = null
+  let rafId: number | null = null
 
   const markFrame = (): boolean => {
     frame = findFrame()
@@ -167,26 +175,51 @@ export function installFrameController(): () => void {
         frame.setAttribute('data-mobile-nav', 'frame')
       }
       ensureDismissShadow()
+      if (onFrameMountedCallback !== null) {
+        onFrameMountedCallback(frame)
+      }
       return true
     }
     return false
   }
 
-  // Check immediately
-  markFrame()
-
-  // Only watch direct children of body/root (subtree: false) to catch when AppFrame mounts,
-  // without listening to deep conversation mutations during streaming.
-  let mountObserver: MutationObserver | null = null
-  if (typeof document !== 'undefined' && document.body) {
-    mountObserver = new MutationObserver(() => {
-      if (markFrame() && mountObserver !== null) {
-        // Once frame is found and marked, stop watching direct child mounts
-        mountObserver.disconnect()
-        mountObserver = null
+  // 1. 立即检查
+  if (!markFrame()) {
+    // 2. 深度监听首屏 #root 或 body 子树挂载，命中 AppFrame 后立刻断开，不影响后续流式传输性能
+    if (typeof document !== 'undefined') {
+      const rootTarget = document.getElementById('root') ?? document.body
+      if (rootTarget !== null) {
+        mountObserver = new MutationObserver(() => {
+          if (markFrame() && mountObserver !== null) {
+            mountObserver.disconnect()
+            mountObserver = null
+            if (rafId !== null) {
+              cancelAnimationFrame(rafId)
+              rafId = null
+            }
+          }
+        })
+        mountObserver.observe(rootTarget, { childList: true, subtree: true })
       }
-    })
-    mountObserver.observe(document.body, { childList: true, subtree: false })
+      // 3. 极速 rAF 轮询兜底（前 30 帧），一旦命中立即清理
+      let rafTries = 0
+      const pollFrame = (): void => {
+        if (markFrame()) {
+          if (mountObserver !== null) {
+            mountObserver.disconnect()
+            mountObserver = null
+          }
+          rafId = null
+          return
+        }
+        if (++rafTries < 30) {
+          rafId = requestAnimationFrame(pollFrame)
+        } else {
+          rafId = null
+        }
+      }
+      rafId = requestAnimationFrame(pollFrame)
+    }
   }
 
   const removeTask = addReconcilerTask({
@@ -199,6 +232,10 @@ export function installFrameController(): () => void {
       if (mountObserver !== null) {
         mountObserver.disconnect()
         mountObserver = null
+      }
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+        rafId = null
       }
       if (frame !== null) {
         frame.removeAttribute('data-mobile-nav')
@@ -216,6 +253,10 @@ export function installFrameController(): () => void {
     if (mountObserver !== null) {
       mountObserver.disconnect()
       mountObserver = null
+    }
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId)
+      rafId = null
     }
     removeTask()
     frameControllerInstalled = false
@@ -291,6 +332,9 @@ export function installReconciler(ctx: ClientContext): () => void {
         core.note(new Set(['data-sidebar-collapsed', 'data-phase']))
       }
     }
+    onFrameMountedCallback = () => {
+      attachFrame()
+    }
     attachFrame()
     if (document.body) {
       observer.observe(document.body, {
@@ -314,6 +358,7 @@ export function installReconciler(ctx: ClientContext): () => void {
     })
     core.activate()
     return () => {
+      onFrameMountedCallback = null
       observer.disconnect()
       core.deactivate()
     }
@@ -578,8 +623,13 @@ export function installOverlayInteractions(ctx: ClientContext): void {
     }
     // Capture phase: run before the shell or a plugin processes the click,
     // so takeover panels never render under the open drawer.
-    const drawerRoot = (): HTMLElement | null =>
-      document.querySelector<HTMLElement>('[data-mobile-nav="frame"] > :first-child')
+    const drawerRoot = (): HTMLElement | null => {
+      const f = getFrame()
+      return (
+        f?.querySelector<HTMLElement>(':scope > :first-child') ??
+        document.querySelector<HTMLElement>('[data-mobile-nav="frame"] > :first-child, [class*="sidebarCol"]')
+      )
+    }
 
     // Shared frame: inside the drawer, on a row navigation target, and not on
     // one of its buttons. Deliberately free of the DSHA tap-close exemption —
