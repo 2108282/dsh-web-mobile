@@ -247,7 +247,7 @@ dsh web
 
 ## Testing & QA
 
-- Automated gates: `pnpm verify` (typecheck) and `pnpm test:core`（33 个测试文件，glob 覆盖 `tests/` 全部）. `pnpm build` additionally exercises the custom client bundler. Use `git diff --check` for whitespace hygiene.
+- Automated gates: `pnpm verify` (typecheck) and `pnpm test:core`（34 个测试文件，glob 覆盖 `tests/` 全部）. `pnpm build` additionally exercises the custom client bundler. Use `git diff --check` for whitespace hygiene.
 - There is no linter, formatter, or coverage setup; the CI workflow (`.github/workflows/ci.yml`) additionally runs the lib freshness gate `git diff --exit-code lib`.
 - After source/layout changes, install the linked plugin in a real DSH Web profile, restart `dsh web`, and check both sides of the breakpoint:
   - **Narrow phone (~390px):** rail hidden; drawer/FAB/backdrop open and close; Escape; session-row action menus do not close the drawer; settings remains usable; Files opens explorer/preview sheets; session-log/footer actions work; preview fullscreen opens and resets.

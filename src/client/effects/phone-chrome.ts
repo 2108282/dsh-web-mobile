@@ -409,6 +409,9 @@ export function detectIosWebKit(
 /** Marker the iOS-only zoom-guard CSS is scoped to (html element). */
 const IOS_MARKER = 'data-mobile-nav-ios'
 
+/** Marker set on html when running as an installed standalone PWA / fullscreen app. */
+export const STANDALONE_MARKER = 'data-mobile-standalone'
+
 /**
  * Viewport content the plugin owns while the mobile branch is armed.
  * Deliberately zoom-free: iOS 10+ ignores maximum-scale/user-scalable for
@@ -510,6 +513,21 @@ export function installPhoneChrome(ctx: ClientContext): void {
     themeMeta.content = bodyBg()
     if (themeMeta.parentElement === null) document.head.appendChild(themeMeta)
 
+    const syncStandalone = (): void => {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        Boolean((navigator as unknown as { standalone?: boolean }).standalone)
+      if (isStandalone) {
+        root.setAttribute(STANDALONE_MARKER, '')
+      } else {
+        root.removeAttribute(STANDALONE_MARKER)
+      }
+    }
+    syncStandalone()
+    const standaloneMq = window.matchMedia('(display-mode: standalone)')
+    standaloneMq.addEventListener('change', syncStandalone)
+
     // The keyboard-less viewport height (STABLE_VIEWPORT_VAR).
     //
     // Measured 2026-09-25 on the reporter's phone (Android 16 WebView,
@@ -543,6 +561,8 @@ export function installPhoneChrome(ctx: ClientContext): void {
     window.addEventListener('resize', syncStableViewport)
 
     return () => {
+      standaloneMq.removeEventListener('change', syncStandalone)
+      root.removeAttribute(STANDALONE_MARKER)
       window.removeEventListener('resize', syncStableViewport)
       root.style.removeProperty(STABLE_VIEWPORT_VAR)
       metaObserver.disconnect()

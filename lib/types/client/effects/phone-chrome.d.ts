@@ -82,6 +82,8 @@ export declare function detectIosWebKit(nav: {
     userAgent: string;
     maxTouchPoints: number;
 }, supports: ((condition: string) => boolean) | null): boolean;
+/** Marker set on html when running as an installed standalone PWA / fullscreen app. */
+export declare const STANDALONE_MARKER = "data-mobile-standalone";
 /**
  * CSS custom property carrying the viewport height WITHOUT the soft keyboard
  * (px), maintained by the viewport effect below. Mobile cards that must not

@@ -41,6 +41,9 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
   body {
     touch-action: pan-y pinch-zoom !important;
     overscroll-behavior-x: none !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
   }
 
   /* AppFrame: the drawer takes the sidebar column out of grid flow, so the
@@ -74,6 +77,15 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     box-sizing: border-box !important;
     position: relative !important;
     grid-template-columns: minmax(0, 1fr) 0 0 !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    padding-top: 0px !important;
+  }
+  html[data-mobile-standalone] [data-mobile-nav="frame"],
+  html[data-mobile-standalone]:has([data-mobile-nav]) [class*="pI_x6G_frame"],
+  html[data-mobile-standalone]:has([data-mobile-nav]) [class*="frame"]:has(> [class*="sidebarCol"]) {
     padding-top: env(safe-area-inset-top, 0px) !important;
   }
 
@@ -97,75 +109,37 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      position/inset/width on the element, the column kept a correct-looking box
      while neither painting nor hit-testing, which is the "all black, click
      anywhere closes" root cause. The backdrop we append carries the dimming. */
-  [data-mobile-nav="frame"] > :first-child,
+  [data-mobile-nav="frame"] > :first-child {
+    position: absolute !important;
+    inset: 0 auto 0 0 !important;
+    width: min(88vw, 280px) !important;
+    z-index: 1300 !important;
+    transform: translateX(-110%);
+    transition: transform .28s var(--ds-ease-in-out, ease-in-out);
+    padding-top: 0px !important;
+    border-right: none !important;
+    background: var(--dsw-alias-bg-surface, #f9fafb);
+    touch-action: pan-y pinch-zoom !important;
+  }
+  html[data-mobile-standalone] [data-mobile-nav="frame"] > :first-child {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+  }
   [data-mobile-nav="frame"] > [class*="sidebarCol"],
   html:has([data-mobile-nav]) [class*="frame"]:has(> [class*="sidebarCol"]) > [class*="sidebarCol"] {
     position: absolute !important;
     inset: 0 auto 0 0 !important;
-    /* !important is load-bearing: the host ships
-       [data-dsh-frame] [data-pane="sidebar"] { width: min(88vw, 320px) !important }
-       under (max-width: 768px), which at 390px resolves to a flat 320px and
-       BEATS a plain declaration here - measured: our max-content never applied
-       and the column stayed 320px.
-       280 is the drawer's hard floor, measured by sweeping the column width from
-       304 down to 264: the inner surface is a FIXED 280px box and never
-       reflows, so every pixel below 280 is simply clipped off its right edge
-       (the list stays 270px at every width and its right edge sits at 278, so
-       270 and below cut into the list itself). At exactly 280 the panel is fully
-       intact - only the 12px of its right-hand padding is given up - which is
-       what the owner asked for over the previous 304. Going narrower is a
-       one-line change, but it starts eating content. */
     width: min(88vw, 280px) !important;
-    /* 1300 is a contract with base.css: the host pins its native sidebarCol at
-       z-index:1100 and paints its mid layers up to that band, so the drawer must
-       sit above the host stack AND above our own backdrop at 1250 (which dims
-       the content area). At 40 the backdrop covered the drawer itself, so
-       opening it showed a full-screen dim with no drawer (measured 2026-09-13
-       at 390px: backdrop [0,0,390,844] z1250 over column [0,0,320,844] z40, and
-       elementFromPoint(40,300) returned the backdrop). Keep in sync with the
-       backdrop z in base.css. */
     z-index: 1300 !important;
     transform: translateX(-110%);
     transition: transform .28s var(--ds-ease-in-out, ease-in-out);
-    /* Keep the drawer's own content below the status bar / notch: the drawer
-       spans the full frame height (its absolute containing block is the
-       frame's padding box, so the frame's own safe-area padding does NOT
-       reach it). The drawer background paints the status-bar strip, which
-       the client's theme-color meta matches, so the strip reads seamless. */
-    padding-top: env(safe-area-inset-top, 0px) !important;
-    /* Kill the official sidebarCol right border: with the backdrop the edge
-       reads cleanly, and the settings dialog (width:100% of this box) stays
-       pixel-flush with the drawer. */
+    padding-top: 0px !important;
     border-right: none !important;
-
-    /* The drawer's inner surface is 280px wide while the column is 88vw/320px, so
-     the remaining 40px showed our own column background as a vertical strip
-     along the right edge (measured: content right edge 280, column 320; the
-     owner reported a white bar). The inner surface owns that band instead, so
-     the strip is filled by the drawer's real surface colour. */
-    /* The 40px band is a STACKING result, not a colour one: the drawer's inner
-     surface is only 280px wide (host markup), while our column is 320px and
-     carries z-index 1300 - so the column's own background paints OVER the
-     surface's right 40px. Pixel-verified from a screenshot with the drawer open:
-     x=10..270 rgb(249,250,251) (the surface) against x=285..315 rgb(255,255,255)
-     (our white column). Repainting the column with the surface's own value makes
-     the seam invisible whatever the theme does; the surface underneath keeps its
-     own colour for the 280px it does cover. */
     background: var(--dsw-alias-bg-surface, #f9fafb);
-    /* Drawer swipe gestures (edge swipe-in / content swipe-out, see
-     docs/specs/2026-08-27-sidebar-swipe-gestures.md).
-     One rule is load-bearing for the gesture layer: dropping pan-x on the
-     drawer lets horizontal pointermove events reach the gesture code —
-     WITHOUT it the browser treats a horizontal stroke as a pan, fires
-     pointercancel and the gesture never classifies (vertical panning stays
-     intact). Start-hit is decided purely by geometry on the document
-     capture listener (START_ZONE_RATIO = 0.45 of the viewport width, ~176px
-     at 390px); there is no hotspot element (removed per audit C2,
-     2026-08-27). pinch-zoom rides along with the
-     root value so a browser-applied zoom stays undoable inside the drawer
-     too (#45); touch-action intersects down the ancestor chain, so a bare
-     pan-y here would cancel the root's pinch permission. */
     touch-action: pan-y pinch-zoom !important;
+  }
+  html[data-mobile-standalone] [data-mobile-nav="frame"] > [class*="sidebarCol"],
+  html[data-mobile-standalone]:has([data-mobile-nav]) [class*="frame"]:has(> [class*="sidebarCol"]) > [class*="sidebarCol"] {
+    padding-top: env(safe-area-inset-top, 0px) !important;
   }
 
   /* Closed slot, at the host's OWN specificity. 0.1.5 added a narrow-branch
@@ -272,6 +246,9 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      instead of silently double-padding. The rule lives in the mobile branch,
      so desktop keeps the host layout. */
   [data-sidebar-right-panel="fullscreen"] {
+    padding-top: 0px !important;
+  }
+  html[data-mobile-standalone] [data-sidebar-right-panel="fullscreen"] {
     padding-top: env(safe-area-inset-top, 0px) !important;
   }
 
