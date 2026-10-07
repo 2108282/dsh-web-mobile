@@ -2478,5 +2478,16 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
   [data-mobile-nav="frame"] [class*="sessionRow"] [class*="_rowActions"] {
     display: inline-flex !important;
   }
+  /* 隐藏左侧多余的静态常驻标志：右侧操作区已包含常驻切换按钮，避免置顶时左右重复显示两个图钉 */
+  [data-mobile-nav="frame"] [class*="sessionRow"] [class*="pinIndicator"] {
+    display: none !important;
+  }
+  /* 归档按钮不放在表面（防误触，归档入口保留在 ⋯ 菜单内），表面仅保留 ⋯ 菜单与常驻按钮 */
+  [data-mobile-nav="frame"] [class*="sessionRow"] [class*="_rowActions"] button[aria-label*="归档"],
+  [data-mobile-nav="frame"] [class*="sessionRow"] [class*="_rowActions"] button[aria-label*="archive" i],
+  [data-mobile-nav="frame"] [class*="sessionRow"] [class*="_rowActions"] button[aria-label*="Archive"],
+  [data-mobile-nav="frame"] [class*="sessionRow"] [class*="_rowActions"] button[aria-label*="封存"] {
+    display: none !important;
+  }
 }
 `

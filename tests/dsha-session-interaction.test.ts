@@ -1,10 +1,10 @@
-// 2026-09-22 会话行交互契约（群内统一）：单击 = 选中、双击 = 打开、长按 = 改会话名。
+// 会话行交互契约：单击 = 选中、双击 = 打开；彻底禁用侧边栏长按改名以防误触。
 // 宿主 0.1.7 把「改会话名」挂在会话行标题的 dblclick 上（workspace 的
 // onRenameRequest），恰好和「双击 = 打开」撞同一个事件：双击会既打开会话又弹改名框。
-// 这个文件把三环钉住，防止以后有人顺手把任一环改回去：
-//   1) onDrawerDoubleClick 吞掉真实 dblclick，只放行我们自己派发的那一个；
-//   2) 长按计时器走 requestRowRename，只有拿不到标题时才退回 ⋯ 菜单；
-//   3) 移动样式把 _rowActions 常显——长按不再开 ⋯ 菜单，菜单不能因此失去触屏入口。
+// 这个文件把防误触和交互逻辑钉住：
+//   1) onDrawerDoubleClick 吞掉真实 dblclick，防止双击打开时误弹改名框；
+//   2) 侧边栏彻底禁用长按改名计时器，杜绝误触；
+//   3) 移动样式把 _rowActions 常显——改名/删除统一通过行内 ⋯ 菜单进入。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -29,24 +29,16 @@ const bodyOf = (source: string, name: string): string => {
   return next === -1 ? rest : rest.slice(0, next)
 }
 
-test('双击：真实 dblclick 被吞掉，只有我们派发的合成事件放行', () => {
+test('双击：真实 dblclick 被捕获拦截，防止双击打开会话时误弹改名框', () => {
   const swallow = bodyOf(CHROME, 'onDrawerDoubleClick')
-  // Identity check first: without it our own long-press replay would be eaten too.
-  assert.match(swallow, /syntheticDoubleClicks\.has\(event\)/)
   assert.match(swallow, /target\.closest\('\[class\*="sessionRow"\] \[class\*="_title"\]'\)/)
   assert.match(swallow, /event\.stopPropagation\(\)/)
-  // The event object we dispatch ourselves is the only one marked in the WeakSet.
-  assert.match(bodyOf(CHROME, 'requestRowRename'), /syntheticDoubleClicks\.add\(event\)/)
 })
 
-test('长按：改名优先，⋯ 菜单只作拿不到标题时的退路', () => {
+test('长按：彻底移除长按改名计时器与逻辑，防止误触', () => {
   const arming = bodyOf(CHROME, 'onDrawerPointerDown')
-  assert.match(arming, /if \(!requestRowRename\(pressRow\)\) openRowMenu\(pressRow\)/)
-  // Rename replays the host's own entry point instead of forking the dialog:
-  // the title's dblclick, dispatched with the identity mark set.
-  const rename = bodyOf(CHROME, 'requestRowRename')
-  assert.match(rename, /new MouseEvent\('dblclick', \{ bubbles: true, cancelable: true, view: window \}\)/)
-  assert.match(rename, /title\.dispatchEvent\(event\)/)
+  assert.doesNotMatch(arming, /requestRowRename/)
+  assert.doesNotMatch(arming, /pressTimer/)
 })
 
 test('双击拦截挂在 document 捕获阶段（React 根容器之前）', () => {
