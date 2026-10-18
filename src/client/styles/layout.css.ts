@@ -246,17 +246,41 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
      instead of silently double-padding. The rule lives in the mobile branch,
      so desktop keeps the host layout. */
   [data-sidebar-right-panel="fullscreen"] {
+    position: fixed !important;
+    inset: 0 0 0 auto !important;
+    width: 100vw !important;
+    z-index: 1200 !important;
+    background: var(--dsw-alias-bg-base) !important;
+    transform: translateX(100%);
+    transition: transform .28s var(--ds-ease-in-out, ease-in-out) !important;
     padding-top: 0px !important;
+    pointer-events: none;
   }
   html[data-mobile-standalone] [data-sidebar-right-panel="fullscreen"] {
     padding-top: env(safe-area-inset-top, 0px) !important;
+  }
+  [data-sidebar-right-panel="fullscreen"][data-sidebar-right-open] {
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+  [data-sidebar-right-panel="fullscreen"]:not([data-sidebar-right-open]) {
+    transform: translateX(100%) !important;
+    pointer-events: none !important;
+  }
+  [data-sidebar-right-panel="fullscreen"] [data-dockkit-host="dock"],
+  [data-sidebar-right-panel="fullscreen"] [data-dockkit-empty],
+  [data-sidebar-right-panel="fullscreen"] [data-dockkit-divider] {
+    transform: none !important;
+    transition: none !important;
+    visibility: visible !important;
   }
 
   /* prefers-reduced-motion: the drawer's .28s slide is motion; drop it
      (audit S2 2026-08-27 — the old reduce block only covered the settings
      sheet and its mask). Same idiom as the animation:none blocks below. */
   @media (prefers-reduced-motion: reduce) {
-    [data-mobile-nav="frame"] > :first-child {
+    [data-mobile-nav="frame"] > :first-child,
+    [data-sidebar-right-panel="fullscreen"] {
       transition: none !important;
     }
   }
