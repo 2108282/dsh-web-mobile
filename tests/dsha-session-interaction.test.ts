@@ -52,3 +52,20 @@ test('长按改义后，⋯ 菜单在触屏仍可达（_rowActions 常显）', (
     /\[data-mobile-nav="frame"\] \[class\*="sessionRow"\] \[class\*="_rowActions"\] \{\s*display: inline-flex !important;/,
   )
 })
+
+test('抽屉打开时，浮动菜单（[role=menu]）与弹出对话框豁免外部点击收起，确保操作卡片按钮可正常响应', () => {
+  const exempt = bodyOf(CHROME, 'isDrawerExemptTarget')
+  assert.match(exempt, /\[role="menu"\]/)
+  assert.match(exempt, /\[role="dialog"\]/)
+  assert.match(exempt, /\[aria-modal="true"\]/)
+
+  const down = bodyOf(CHROME, 'onDrawerPointerDown')
+  assert.match(down, /!isDrawerExemptTarget\(target\)/)
+
+  const click = bodyOf(CHROME, 'onDrawerClick')
+  assert.match(click, /!isDrawerExemptTarget\(target\)/)
+
+  const up = bodyOf(CHROME, 'onDrawerPointerUp')
+  assert.match(up, /!isDrawerExemptTarget\(target\)/)
+})
+
