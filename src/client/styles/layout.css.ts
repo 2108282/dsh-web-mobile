@@ -1628,11 +1628,12 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
   }
   /* 会话标签行（[class*="_tabs"]）：宿主 0.2.x 引入了 ViewsMoreMenu（更多视图入口 ···）
      与 [role="tablist"]（对话/轨迹）并列放在 tabs 容器中。
-     强制保持单行不折行，[role="tablist"] 弹性伸缩横向滚动，更多按钮（viewsMoreAnchor）靠右对齐。 */
+     强制保持单行不折行，[role="tablist"] 随内容自然包裹（超长时横向滚动），更多按钮（viewsMoreAnchor）紧随其后同一排排列。 */
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_tabs"] {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
+    gap: 0 16px !important;
     width: 100% !important;
     margin-top: 4px !important;
     box-sizing: border-box !important;
@@ -1642,17 +1643,17 @@ export const LAYOUT_CSS = `/* ---------- mobile-only layout (narrow viewport AND
     padding-right: 118px !important;
   }
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [role="tablist"] {
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
     min-width: 0 !important;
     width: auto !important;
     margin-top: 0 !important;
     padding-right: 0 !important;
     box-sizing: border-box !important;
   }
-  /* 更多视图按钮（ViewsMoreMenu）：保持单行、紧跟右侧或居右 */
+  /* 更多视图按钮（ViewsMoreMenu）：紧挨着对话/轨迹标签同一排展示 */
   [data-mobile-nav="frame"] [data-phase] header:has([class*="_headerLeading"]) [class*="_viewsMoreAnchor"] {
     flex: 0 0 auto !important;
-    margin-left: auto !important;
+    margin-left: 0 !important;
     display: flex !important;
     align-items: center !important;
     align-self: center !important;
