@@ -79,3 +79,12 @@ test('blank (new-session) rows never get the injected delete item', () => {
   // is annotated in the source so it is not re-litigated as a bug.
   assert.match(SOURCE, /Known ceiling/)
 })
+
+test('injected favorite item covers favorite and unfavorite states with star glyphs', () => {
+  assert.match(SOURCE, /FAVORITE_ITEM_MARKER = 'data-mobile-nav="session-favorite"'/)
+  assert.match(SOURCE, /STAR_OUTLINE_SVG/)
+  assert.match(SOURCE, /STAR_FILLED_SVG/)
+  assert.match(SOURCE, /navT\('favoriteSession'\)/)
+  assert.match(SOURCE, /navT\('unfavoriteSession'\)/)
+  assert.match(SOURCE, /data-mobile-nav="session-favorite"/)
+})

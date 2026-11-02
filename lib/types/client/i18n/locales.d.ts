@@ -11,6 +11,8 @@ export declare const zh: {
     readonly fileUpload: "添加文件";
     readonly previewFullscreen: "全屏预览";
     readonly previewExitFullscreen: "退出全屏";
+    readonly favoriteSession: "收藏";
+    readonly unfavoriteSession: "取消收藏";
     readonly deleteSession: "删除会话";
     readonly deleteConfirmTitle: "删除会话？";
     readonly deleteConfirmDesc: "将删除「{title}」的完整会话记录，此操作不可恢复。";

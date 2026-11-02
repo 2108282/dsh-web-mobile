@@ -38,6 +38,19 @@ const WORKSPACE_NS = 'workspace'
 /** Marker on the injected menu item (idempotence across React re-renders). */
 const DELETE_ITEM_MARKER = 'data-mobile-nav="session-delete"'
 
+/** Marker on the injected favorite menu item. */
+const FAVORITE_ITEM_MARKER = 'data-mobile-nav="session-favorite"'
+
+/** 16px outline star glyph (currentColor-stroked). */
+const STAR_OUTLINE_SVG = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">'
+  + '<path d="M8 1.75l1.95 4.35 4.75.43-3.6 3.16 1.07 4.56L8 11.85l-4.17 2.4 1.07-4.56-3.6-3.16 4.75-.43L8 1.75z" />'
+  + '</svg>'
+
+/** 16px filled star glyph (#e8b931 gold). */
+const STAR_FILLED_SVG = '<svg width="16" height="16" viewBox="0 0 16 16" fill="#e8b931" stroke="#e8b931" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">'
+  + '<path d="M8 1.75l1.95 4.35 4.75.43-3.6 3.16 1.07 4.56L8 11.85l-4.17 2.4 1.07-4.56-3.6-3.16 4.75-.43L8 1.75z" />'
+  + '</svg>'
+
 /** Danger accent read from the theme, with a fixed fallback. */
 const DANGER_COLOR = 'var(--dsw-alias-state-error-primary, #b91c1c)'
 
@@ -93,6 +106,45 @@ export function installSessionMenuDelete(ctx: ClientContext): void {
     let injectRaf = 0
     let dialogHost: { backdrop: HTMLElement; card: HTMLElement } | null = null
     let closeDialogOnKey: ((event: KeyboardEvent) => void) | null = null
+
+    const favoriteIds = new Set<string>()
+    try {
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('dsh-web-mobile:favorites') : null
+      if (raw !== null) {
+        const parsed = JSON.parse(raw) as unknown
+        if (Array.isArray(parsed)) {
+          for (const id of parsed) if (typeof id === 'string') favoriteIds.add(id)
+        }
+      }
+    } catch {}
+
+    const syncRemoteFavorites = (): void => {
+      const remote = ctx.get('remote.workspaceRegistry') as {
+        favoriteSessions?: () => Promise<{ favoriteSessionIds?: string[] }>
+      } | undefined
+      if (remote && typeof remote.favoriteSessions === 'function') {
+        remote.favoriteSessions().then((res) => {
+          if (Array.isArray(res?.favoriteSessionIds)) {
+            for (const id of res.favoriteSessionIds) favoriteIds.add(id)
+            try {
+              if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('dsh-web-mobile:favorites', JSON.stringify([...favoriteIds]))
+              }
+            } catch {}
+          }
+        }).catch(() => {})
+      }
+    }
+    syncRemoteFavorites()
+
+    const isRowFavorited = (sessionId: string, row?: HTMLElement | null): boolean => {
+      if (favoriteIds.has(sessionId)) return true
+      if (row !== null && row !== undefined) {
+        if (row.querySelector('[data-favorited="true"]') !== null) return true
+        if (row.querySelector('.dsham_starSlot[data-favorited="true"]') !== null) return true
+      }
+      return false
+    }
 
     /** Resolve one session id for a row: title match, group position tiebreak. */
     const resolveSessionId = (row: HTMLElement, title: string): string | undefined => {
@@ -324,62 +376,148 @@ export function installSessionMenuDelete(ctx: ClientContext): void {
       dialogHost = { backdrop, card }
     }
 
-    /** Inject the delete item into one open session menu (idempotent). */
+    /** Inject the favorite and delete items into one open session menu (idempotent). */
     const injectInto = (menu: HTMLElement): void => {
-      if (menu.querySelector(`[${DELETE_ITEM_MARKER}]`) !== null) return
       const template = menu.querySelector<HTMLElement>('[role="menuitem"]')
       const wrap = template?.parentElement
       const viewport = menu.querySelector<HTMLElement>('[class*="_viewport"]')
       if (template === null || wrap === null || wrap === undefined || viewport === null) return
-      const clone = wrap.cloneNode(true) as HTMLElement
-      const button = clone.querySelector<HTMLButtonElement>('[role="menuitem"]')
-      if (button === null) return
-      const icon = button.querySelector<HTMLElement>('[class*="_itemIcon"]')
-      if (icon !== null) {
-        icon.innerHTML = TRASH_SVG
-        icon.style.color = DANGER_COLOR
-      }
-      const label = button.querySelector<HTMLElement>('[class*="_itemLabel"]')
-      if (label !== null) {
-        label.textContent = navT('deleteSession')
-        label.style.color = DANGER_COLOR
-      } else if (button.firstElementChild === null) {
-        // 0.1.5 shape: the menuitem button carries its text directly (no
-        // `_itemLabel` span, no icon element). Replace the whole text and let
-        // the danger color ride the button itself. A button WITH element
-        // children but no label span is an unknown future shape — leave its
-        // text alone rather than guess.
-        button.textContent = navT('deleteSession')
-        button.style.color = DANGER_COLOR
-      }
-      button.setAttribute('data-mobile-nav', 'session-delete')
-      button.addEventListener('click', (event) => {
-        event.preventDefault()
-        event.stopPropagation()
-        const captured = anchor
-        // Close the host menu by toggling its anchor (React-owned state).
-        captured?.button.click()
-        try {
-          if (captured === null || captured === undefined) {
-            showError(navT('deleteErrorResolve'))
-            return
+
+      const captured = anchor
+      const targetSessionId = (captured !== null && captured !== undefined)
+        ? resolveSessionId(captured.row, captured.title)
+        : undefined
+
+      // 1. Inject or update the Favorite menu item
+      let favButton = menu.querySelector<HTMLButtonElement>(`[${FAVORITE_ITEM_MARKER}]`)
+      if (favButton === null) {
+        const favClone = wrap.cloneNode(true) as HTMLElement
+        const btn = favClone.querySelector<HTMLButtonElement>('[role="menuitem"]')
+        if (btn !== null) {
+          btn.setAttribute('data-mobile-nav', 'session-favorite')
+          btn.addEventListener('click', async (event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            const curAnchor = anchor
+            curAnchor?.button.click()
+            if (curAnchor === null || curAnchor === undefined) return
+            const sId = resolveSessionId(curAnchor.row, curAnchor.title)
+            if (sId === undefined) return
+            const isFav = isRowFavorited(sId, curAnchor.row)
+            const nextFav = !isFav
+            if (nextFav) {
+              favoriteIds.add(sId)
+            } else {
+              favoriteIds.delete(sId)
+            }
+            try {
+              if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('dsh-web-mobile:favorites', JSON.stringify([...favoriteIds]))
+              }
+            } catch {}
+
+            const remote = ctx.get('remote.workspaceRegistry') as {
+              setSessionFavorite?: (input: { sessionId: string; favorite: boolean }) => Promise<{ favoriteSessionIds?: string[] }>
+            } | undefined
+            if (remote && typeof remote.setSessionFavorite === 'function') {
+              try {
+                const res = await remote.setSessionFavorite({ sessionId: sId, favorite: nextFav })
+                if (Array.isArray(res?.favoriteSessionIds)) {
+                  favoriteIds.clear()
+                  for (const id of res.favoriteSessionIds) favoriteIds.add(id)
+                  try {
+                    if (typeof localStorage !== 'undefined') {
+                      localStorage.setItem('dsh-web-mobile:favorites', JSON.stringify([...favoriteIds]))
+                    }
+                  } catch {}
+                }
+              } catch (err) {
+                console.warn('[dsh-web-mobile] setSessionFavorite call failed:', err)
+              }
+            }
+          })
+
+          const delItem = viewport.querySelector(`[${DELETE_ITEM_MARKER}]`)?.parentElement
+          if (delItem !== null && delItem !== undefined) {
+            viewport.insertBefore(favClone, delItem)
+          } else {
+            viewport.appendChild(favClone)
           }
-          const sessionId = resolveSessionId(captured.row, captured.title)
-          if (sessionId === undefined) {
-            showError(navT('deleteErrorResolve'))
-            return
-          }
-          showDeleteDialog(sessionId, captured.title)
-        } catch (reason) {
-          // Never fail silently: surface internal resolution errors instead of
-          // leaving the tap with no visible result.
-          console.error('[dsh-web-mobile] session delete failed:', reason)
-          showError(navT('deleteErrorGeneric', {
-            message: reason instanceof Error ? reason.message : String(reason),
-          }))
+          favButton = btn
         }
-      })
-      viewport.appendChild(clone)
+      }
+
+      if (favButton !== null) {
+        const favorited = targetSessionId !== undefined && isRowFavorited(targetSessionId, captured?.row)
+        const icon = favButton.querySelector<HTMLElement>('[class*="_itemIcon"]')
+        if (icon !== null) {
+          icon.innerHTML = favorited ? STAR_FILLED_SVG : STAR_OUTLINE_SVG
+          icon.style.color = favorited ? '#e8b931' : ''
+        }
+        const label = favButton.querySelector<HTMLElement>('[class*="_itemLabel"]')
+        const text = favorited ? navT('unfavoriteSession') : navT('favoriteSession')
+        if (label !== null) {
+          label.textContent = text
+          label.style.color = favorited ? '#e8b931' : ''
+        } else if (favButton.firstElementChild === null) {
+          favButton.textContent = text
+          favButton.style.color = favorited ? '#e8b931' : ''
+        }
+      }
+
+      // 2. Inject Delete menu item (idempotent across React re-renders)
+      if (menu.querySelector(`[${DELETE_ITEM_MARKER}]`) === null) {
+        const clone = wrap.cloneNode(true) as HTMLElement
+        const button = clone.querySelector<HTMLButtonElement>('[role="menuitem"]')
+        if (button !== null) {
+          const icon = button.querySelector<HTMLElement>('[class*="_itemIcon"]')
+          if (icon !== null) {
+            icon.innerHTML = TRASH_SVG
+            icon.style.color = DANGER_COLOR
+          }
+          const label = button.querySelector<HTMLElement>('[class*="_itemLabel"]')
+          if (label !== null) {
+            label.textContent = navT('deleteSession')
+            label.style.color = DANGER_COLOR
+          } else if (button.firstElementChild === null) {
+            // 0.1.5 shape: the menuitem button carries its text directly (no
+            // `_itemLabel` span, no icon element). Replace the whole text and let
+            // the danger color ride the button itself. A button WITH element
+            // children but no label span is an unknown future shape — leave its
+            // text alone rather than guess.
+            button.textContent = navT('deleteSession')
+            button.style.color = DANGER_COLOR
+          }
+          button.setAttribute('data-mobile-nav', 'session-delete')
+          button.addEventListener('click', (event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            const captured = anchor
+            // Close the host menu by toggling its anchor (React-owned state).
+            captured?.button.click()
+            try {
+              if (captured === null || captured === undefined) {
+                showError(navT('deleteErrorResolve'))
+                return
+              }
+              const sessionId = resolveSessionId(captured.row, captured.title)
+              if (sessionId === undefined) {
+                showError(navT('deleteErrorResolve'))
+                return
+              }
+              showDeleteDialog(sessionId, captured.title)
+            } catch (reason) {
+              // Never fail silently: surface internal resolution errors instead of
+              // leaving the tap with no visible result.
+              console.error('[dsh-web-mobile] session delete failed:', reason)
+              showError(navT('deleteErrorGeneric', {
+                message: reason instanceof Error ? reason.message : String(reason),
+              }))
+            }
+          })
+          viewport.appendChild(clone)
+        }
+      }
     }
 
     /**
